@@ -14,7 +14,9 @@ import org.json.*;
 @ServerEndpoint("/websocket")
 public class Server {
 
-    private static List<User> connected_users = new ArrayList<User>();
+    private static List<User> connected_users = new ArrayList<>();
+    private static List<Room> all_rooms = new ArrayList<>();
+    private int room_index = 0;
 
     @OnMessage
     public void onMessage(String message, Session session) throws IOException {
