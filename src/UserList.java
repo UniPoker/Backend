@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by loster on 20.05.2015.
  */
-public class UserList {
+public class UserList{
 
     private List<User> users;
 

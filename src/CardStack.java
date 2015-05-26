@@ -18,6 +18,10 @@ public class CardStack {
         Collections.shuffle(cards);
     }
 
+    public Card pop(){
+        return cards.pop();
+    }
+
     private Stack<Card> initAllCards() {
         Stack<Card> cards = new Stack<>();
 
@@ -26,6 +30,8 @@ public class CardStack {
                 cards.add(new Card(value, symbol));
             }
         }
+        shuffle();
         return cards;
     }
+
 }
