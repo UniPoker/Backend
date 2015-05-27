@@ -1,4 +1,7 @@
 import javax.websocket.Session;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Stefan on 17.05.2015.
@@ -9,6 +12,8 @@ public class User {
     private String name;
     private int room_index;
     private Card[] hand_cards;
+    private String last_action;
+    private boolean has_folded;
 
     private double limit = 1000.00;
 
@@ -63,4 +68,27 @@ public class User {
         hand_cards = new Card[2];
     }
 
+    public String getLastAction() {
+        return last_action;
+    }
+
+    public void setLastAction(String last_action) {
+        this.last_action = last_action;
+    }
+
+    public boolean hasFolded() {
+        return has_folded;
+    }
+
+    public void setHasFolded(boolean has_folded) {
+        this.has_folded = has_folded;
+    }
+
+    public double getLimit() {
+        return limit;
+    }
+
+    public void setLimit(double limit) {
+        this.limit = limit;
+    }
 }

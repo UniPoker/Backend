@@ -44,6 +44,7 @@ public class Game {
         if (isCurrent(player)) {
             pod.add(getLastBet() + raise);
             first = player;
+            player.setLastAction(Actions.RAISE);
             setNextUser(player);
         }
     }
@@ -51,6 +52,7 @@ public class Game {
     public void doBet(User player, int bet) {
         if (isCurrent(player)) {
             pod.add(bet);
+            player.setLastAction(Actions.BET);
             setNextUser(player);
         }
     }
@@ -59,14 +61,41 @@ public class Game {
         if (isCurrent(player)) {
             int bet = getLastBet();
             pod.add(bet);
+            player.setLastAction(Actions.CALL);
             setNextUser(player);
         }
     }
 
     public void doCheck(User player) {
         if (isCurrent(player)) {
-            setNextUser(player);
+            if(players.getUserByIndex(players.getUsers().indexOf(player) - 1).getLastAction() == Actions.CHECK || player.equals(first)){
+                player.setLastAction(Actions.CHECK);
+                setNextUser(player);
+            }
         }
+    }
+
+    public void doFold(User player){
+        if(isCurrent(player)){
+            int i = 0;
+            User possible_winner = null;
+            player.setHasFolded(true);
+            player.setLastAction(Actions.FOLD);
+            for(User user: players.getUsers()){
+                if(!user.hasFolded()){
+                    i++;
+                    possible_winner = user;
+                }
+            }
+            if(i == 1){
+                noPlayersLeft(possible_winner);
+            }
+        }
+    }
+
+    private void noPlayersLeft(User possible_winner) {
+        possible_winner.setLimit(possible_winner.getLimit() + getPodValue());
+        startRound();
     }
 
     private boolean isCurrent(User player) {
@@ -78,12 +107,17 @@ public class Game {
     }
 
     private void setNextUser(User player) {
-        current = players.getUserByIndex(players.getUsers().indexOf(player) + 1);
+        User person = players.getUserByIndex(players.getUsers().indexOf(player) + 1);
+        if(person.hasFolded()){
+            setNextUser(person);
+        }
+        current = person;
         if (current.equals(first)) {
             if(last_turn){
                 //Karten verwerten + Sieger ermitteln
             }else{
-                //NEUE KARTEN VERTEILEN
+                dealBoardCards();
+                first = players.getUserByIndex(players.getUsers().indexOf(big_blind) +1);
             }
         }
     }
@@ -126,4 +160,8 @@ public class Game {
         }
     }
 
+    private int getPodValue(){
+        int sum = pod.stream().mapToInt(Integer::intValue).sum();
+        return sum;
+    }
 }
