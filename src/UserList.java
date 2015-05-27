@@ -74,5 +74,9 @@ public class UserList{
         return users;
     }
 
+    public User getUserByIndex(int index){
+        return users.get(index);
+    }
+
 
 }
