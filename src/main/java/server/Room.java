@@ -18,7 +18,7 @@ public class Room {
     }
 
     public boolean joinRoom(User user){
-        if(all_users.length() < MAX_PLAYER){
+        if(all_users.length < MAX_PLAYER){
             all_users.add(user);
             user.setRoomIndex(this.id);
             return true;

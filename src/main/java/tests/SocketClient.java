@@ -8,6 +8,7 @@ import java.net.URI;
 
 @ClientEndpoint
 public class SocketClient {
+    public static String message;
 
     public static Session connect(URI uri) throws Exception {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -28,6 +29,7 @@ public class SocketClient {
 
     @OnMessage
     public void onMessage(String msg, Session session) {
+        message = msg;
         System.out.println(session.getId() + ": " + msg);
     }
 

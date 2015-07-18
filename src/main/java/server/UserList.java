@@ -8,9 +8,10 @@ import java.util.List;
 /**
  * Created by loster on 20.05.2015.
  */
-public class UserList{
+public class UserList {
 
     private List<User> users;
+    public int length = 0;
 
     /**
      * creates an empty server.UserList
@@ -22,6 +23,7 @@ public class UserList{
     public UserList(User user) {
         users = new ArrayList<>();
         users.add(user);
+        length++;
     }
 
     /**
@@ -29,6 +31,7 @@ public class UserList{
      */
     public UserList(User[] users) {
         this.users = new ArrayList<User>(Arrays.asList(users));
+        length += users.length;
     }
 
     /**
@@ -36,6 +39,7 @@ public class UserList{
      */
     public void add(User user) {
         users.add(user);
+        length ++;
     }
 
     /**
@@ -52,6 +56,7 @@ public class UserList{
      */
     public void removeUserWithSession(Session session) {
         users.removeIf(p -> p.getWebsession() == session);
+        length --;
     }
 
     /**
@@ -59,14 +64,15 @@ public class UserList{
      */
     public void clearAll() {
         users.removeAll(users);
+        length = 0;
     }
 
     /**
      * @return the size of server.UserList
      */
-    public int length() {
-        return users.size();
-    }
+//    public int length() {
+//        return users.size();
+//    }
 
     /**
      * @return server.UserList
@@ -78,6 +84,5 @@ public class UserList{
     public User getUserByIndex(int index){
         return users.get(index);
     }
-
 
 }

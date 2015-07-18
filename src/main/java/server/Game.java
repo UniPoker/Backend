@@ -37,7 +37,7 @@ public class Game {
     }
 
     public void startRound() {
-        if (players.length() > 2) {
+        if (players.length > 2) {
             initRound();
         }
     }
