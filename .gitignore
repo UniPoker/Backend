@@ -1,6 +1,16 @@
 
-.idea
 out
 target
 web
 Backend.iml
+.idea/libraries
+.idea/vcs.xml
+.idea/modules.xml
+.idea/uiDesigner.xml
+.idea/workspace.xml
+.idea/encodings.xml
+.idea/compiler.xml
+.idea/.name
+.idea/artifacts
+.idea/copyright
+.idea/misc.xml
