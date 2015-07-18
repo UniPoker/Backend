@@ -1,7 +1,6 @@
+package server;
+
 import javax.websocket.Session;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Stefan on 17.05.2015.
@@ -19,8 +18,8 @@ public class User {
 
     /**
      * Constructor
-     * @param websession Session of connected User
-     * @param name Name of connected User
+     * @param websession Session of connected server.User
+     * @param name Name of connected server.User
      */
     User(Session websession, String name) {
         hand_cards = new Card[2];

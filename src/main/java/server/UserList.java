@@ -1,7 +1,8 @@
+package server;
+
 import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ public class UserList{
     private List<User> users;
 
     /**
-     * creates an empty UserList
+     * creates an empty server.UserList
      */
     public UserList() {
         users = new ArrayList<User>();
@@ -24,51 +25,51 @@ public class UserList{
     }
 
     /**
-     * @param users creates UserList with all Elements of the given Array
+     * @param users creates server.UserList with all Elements of the given Array
      */
     public UserList(User[] users) {
         this.users = new ArrayList<User>(Arrays.asList(users));
     }
 
     /**
-     * @param user user to add to UserList
+     * @param user user to add to server.UserList
      */
     public void add(User user) {
         users.add(user);
     }
 
     /**
-     * @param user User to delete from UserList
+     * @param user server.User to delete from server.UserList
      */
     public void removeUser(User user) {
         users.removeIf(p -> p == user);
     }
 
     /**
-     * Remove User with param session from UserList
+     * Remove server.User with param session from server.UserList
      *
-     * @param session Websession of User
+     * @param session Websession of server.User
      */
     public void removeUserWithSession(Session session) {
         users.removeIf(p -> p.getWebsession() == session);
     }
 
     /**
-     * "delete" all Elements in UserList
+     * "delete" all Elements in server.UserList
      */
     public void clearAll() {
         users.removeAll(users);
     }
 
     /**
-     * @return the size of UserList
+     * @return the size of server.UserList
      */
     public int length() {
         return users.size();
     }
 
     /**
-     * @return UserList
+     * @return server.UserList
      */
     public List<User> getUsers() {
         return users;

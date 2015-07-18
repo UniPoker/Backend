@@ -1,3 +1,4 @@
+package server;
 
 /**
  * Created by loster on 20.05.2015.

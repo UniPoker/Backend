@@ -12,7 +12,7 @@ import java.util.*;
 import org.json.*;
 
 @ServerEndpoint("/websocket")
-public class Server {
+public class WebsocketServer {
 
     private static List<User> connected_users = new ArrayList<>();
     private static List<Room> all_rooms = new ArrayList<>();
