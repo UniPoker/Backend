@@ -35,6 +35,7 @@ public class Room {
     }
 
     public boolean leaveRoom(User user){
+        user.setRoomIndex(-1);
         all_users.removeUser(user);
         return true;
     }
@@ -47,7 +48,9 @@ public class Room {
         return id;
     }
 
-
+    public UserList getAllUsers(){
+        return all_users;
+    }
 
 
 }

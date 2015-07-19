@@ -9,7 +9,7 @@ public class User {
 
     private Session websession;
     private String name;
-    private int room_index;
+    private int room_index = -1;
     private Card[] hand_cards;
     private String last_action;
     private boolean has_folded;
