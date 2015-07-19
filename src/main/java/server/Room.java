@@ -12,11 +12,19 @@ public class Room {
 
     private int id;
 
+    /**
+     * @param User user
+     * @param int id
+     */
     public Room(User user, int id){
         all_users = new UserList(user);
         this.id = id;
     }
 
+    /**
+     * @param User user
+     * @return boolean when connect
+     */
     public boolean joinRoom(User user){
         if(all_users.length < MAX_PLAYER){
             all_users.add(user);
@@ -29,6 +37,14 @@ public class Room {
     public boolean leaveRoom(User user){
         all_users.removeUser(user);
         return true;
+    }
+
+    public int userSize(){
+        return all_users.length;
+    }
+
+    public int getId(){
+        return id;
     }
 
 
