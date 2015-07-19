@@ -8,10 +8,7 @@ import javax.websocket.server.ServerEndpoint;
 import org.json.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //@ClientEndpoint
 @ServerEndpoint("/events/")
@@ -20,6 +17,7 @@ public class SocketLogic {
     private static UserList connected_users = new UserList();
     private static List<server.Room> all_rooms = new ArrayList<>();
     private int room_index = 0;
+    private String [] do_not_authorize = new String[]{"login_user"};
 
     public static UserList getConnectUsers(){
         return connected_users;
@@ -32,36 +30,48 @@ public class SocketLogic {
 
     @OnMessage
     public void onWebSocketMessage(String message, Session session) throws IOException {
+        String event = "error";
         try {
             System.out.println("onMessage " + message);
             System.out.println("!!!!SESSION!!!! " + session);
             JSONObject json_payload = new JSONObject(message);
+            if(json_payload.isNull("body")){
+                throw new JSONException("no Body");
+            }
             JSONObject data = json_payload.getJSONObject("body");
-            String event = json_payload.getString("event");
+            event = json_payload.getString("event");
             JSONObject response;
+            if(!Arrays.asList(do_not_authorize).contains(event)){
+                isLoggedIn(session);
+            }
             switch (event) {
                 case "login_user":
                     response = login_user(data, session);
                     break;
                 case "list_rooms":
+
                     response = list_rooms();
                     break;
                 case "create_room":
                     response = create_room(session);
                     break;
                 default:
-                    response = getJsonFrame(99, "unbekannter RequestType", new JSONObject());
+                    response = getJsonFrame(99, "unbekannter RequestType", new JSONObject(), event+"_response");
             }
             session.getBasicRemote().sendObject(response.toString());
         } catch (JSONException e) {
             e.printStackTrace();
-            session.getBasicRemote().sendText(getJsonFrame(99, "Ungültiges JSON!",new JSONObject()).toString());
+            session.getBasicRemote().sendText(getJsonFrame(99, "Ungültiges JSON!",new JSONObject(), event+"_response").toString());
         } catch (EncodeException e) {
             e.printStackTrace();
-            session.getBasicRemote().sendText(getJsonFrame(99, "Encode Exception!", new JSONObject()).toString());
-        } catch (Exception e) {
+            session.getBasicRemote().sendText(getJsonFrame(99, "Encode Exception!", new JSONObject(), event+"_response" ).toString());
+        } catch(NotLoggedInException e){
             e.printStackTrace();
-            session.getBasicRemote().sendText(getJsonFrame(99, "Ein Fehler trat auf!", new JSONObject()).toString());
+            session.getBasicRemote().sendText(getJsonFrame(99, "Not Logged In!", new JSONObject(), event+"_response" ).toString());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            session.getBasicRemote().sendText(getJsonFrame(99, "Ein Fehler trat auf!", new JSONObject(), event+"_response").toString());
         }
     }
 
@@ -79,10 +89,16 @@ public class SocketLogic {
         cause.printStackTrace(System.err);
     }
 
-    private JSONObject getJsonFrame(int status, String message, JSONObject body) {
-        JSONObject frame =  new JSONObject().put("status", status).put("message", message);
+    private JSONObject getJsonFrame(int status, String message, JSONObject body, String event) {
+        JSONObject frame =  new JSONObject().put("status", status).put("message", message).put("event", event);
         frame.accumulate("body", body);
         return frame;
+    }
+
+    private void isLoggedIn(Session session) throws NotLoggedInException {
+        if(connected_users.getUserBySession(session) == null){
+            throw new NotLoggedInException();
+        }
     }
 
     private JSONObject login_user(JSONObject data, Session session){
@@ -92,7 +108,7 @@ public class SocketLogic {
         for (User current : connected_users.getUsers()) {
             System.out.println("CONNECTED_USERS: " + current);
         }
-        return getJsonFrame(0, "Anmeldung erfolgreich", new JSONObject());
+        return getJsonFrame(0, "Anmeldung erfolgreich", new JSONObject(), "login_user_response");
     }
 
     private JSONObject list_rooms(){
@@ -104,16 +120,19 @@ public class SocketLogic {
             map.put("room_seats", all_rooms.get(i).userSize());
             arr.put(i,map);
         }
-        return getJsonFrame(0,"Anfrage erfolgreich", new JSONObject().accumulate("body",arr));
+        JSONObject response = getJsonFrame(0,"Anfrage erfolgreich",new JSONObject(), "list_rooms_response");
+        response.put("body", arr);
+        return response;
     }
 
     private JSONObject create_room(Session session) {
-        int id = all_rooms.size() == 0 ? 0 : all_rooms.get(all_rooms.size()-1).getId()+1;
+        int id = room_index++;
         Room room = new Room(new User(session,"test1234"),id);
         all_rooms.add(room);
-        JSONObject body = new JSONObject().put("room_id",room.getId());
-        return getJsonFrame(0,"Raum erfolgreich angelegt", new JSONObject().accumulate("body",body));
+        JSONObject body = new JSONObject().put("room_id",id);
+        return getJsonFrame(0,"Raum erfolgreich angelegt", new JSONObject().accumulate("body",body), "create_room_response");
     }
+
 
 
 }

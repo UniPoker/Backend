@@ -85,4 +85,12 @@ public class UserList {
         return users.get(index);
     }
 
+    public User getUserBySession(Session session){
+        for(User user : users){
+            if(user.getWebsession().equals(session)){
+                return user;
+            }
+        }
+        return null;
+    }
 }
