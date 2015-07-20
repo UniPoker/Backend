@@ -18,7 +18,7 @@ public class SocketLogic {
     private static UserList registered_users = new UserList();
     private static RoomList all_rooms = new RoomList();
     private static int room_index = 0;
-    private String[] do_not_authorize = new String[]{"login_user"};
+    private String[] do_not_authorize = new String[]{"login_user", "register_user"};
 
     public static UserList getConnectUsers() {
         return connected_users;
@@ -31,7 +31,7 @@ public class SocketLogic {
 
     @OnMessage
     public void onWebSocketMessage(String message, Session session) throws IOException {
-        String event = "error"; //muss rein damit auch JSON exceptions eine error_response haben
+        String event = "error"; //TODO muss rein damit auch JSON exceptions eine error_response haben
         try {
             System.out.println("onMessage " + message);
             System.out.println("!!!!SESSION!!!! " + session);
@@ -118,7 +118,7 @@ public class SocketLogic {
         System.out.println("USER WIRD EINGELOGGT!");
         if(data.has("user") && data.has("password")){
             for(User user: registered_users.getUsers()){
-                if(user.getName()==data.getString("user") && user.getPassword() == data.getString("password")){
+                if(user.getName().equals(data.getString("user")) && user.getPassword().equals(data.getString("password"))){
                     connected_users.add(user);
                     return getJsonFrame(0, "Anmeldung erfolgreich", new JSONObject(), "login_user_response");
                 }
@@ -199,6 +199,7 @@ public class SocketLogic {
 
     private JSONObject register_user(JSONObject data, Session session) {
         if(data.has("name") && data.has("password")){
+            //TODO hier noch überprüfen ob schon jemand vorhanden ist
             User user = new User(session,data.getString("name"),data.getString("password"));
             registered_users.add(user);
             return getJsonFrame(0,"Registrierung erfolgreich.",new JSONObject(),"register_user_response");
