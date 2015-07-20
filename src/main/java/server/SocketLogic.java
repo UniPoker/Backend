@@ -31,7 +31,7 @@ public class SocketLogic {
 
     @OnMessage
     public void onWebSocketMessage(String message, Session session) throws IOException {
-        String event = "";
+        String event = "error"; //muss rein damit auch JSON exceptions eine error_response haben
         try {
             System.out.println("onMessage " + message);
             System.out.println("!!!!SESSION!!!! " + session);
@@ -148,7 +148,6 @@ public class SocketLogic {
             int id = room_index++;
             Room room = new Room(current_user, id);
             all_rooms.add(room);
-            current_user.setRoomIndex(id);
             JSONObject body = new JSONObject().put("room_id", id);
             return getJsonFrame(0, "Raum erfolgreich angelegt", body, "create_room_response");
         } else {
