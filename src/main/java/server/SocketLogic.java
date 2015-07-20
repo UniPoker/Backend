@@ -15,6 +15,7 @@ import java.util.*;
 public class SocketLogic {
 
     private static UserList connected_users = new UserList();
+    private static UserList registered_users = new UserList();
     private static RoomList all_rooms = new RoomList();
     private static int room_index = 0;
     private String[] do_not_authorize = new String[]{"login_user"};
@@ -67,6 +68,9 @@ public class SocketLogic {
                 case "logout_user":
                     response = logout_user(session);
                     break;
+                case "register_user":
+                    response = register_user(data, session);
+                    break;
                 default:
                     response = getJsonFrame(99, "unbekannter RequestType", new JSONObject(), "error_response");
             }
@@ -87,7 +91,6 @@ public class SocketLogic {
             session.getBasicRemote().sendText(getJsonFrame(99, "Ein Fehler trat auf!", new JSONObject(), event + "_response").toString());
         }
     }
-
 
     @OnClose
     public void onWebSocketClose(CloseReason reason, Session session) {
@@ -116,8 +119,8 @@ public class SocketLogic {
         if (!(data.getString("user").equals("mustermann") && data.getString("password").equals("123456"))) {
             return getJsonFrame(1, "Anmeldung nicht erfolgreich", new JSONObject(), "login_user_response");
         }
-        User user = new User(session, data.getString("user"));
-        connected_users.add(user);
+//        User user = new User(session, data.getString("user"));
+//        connected_users.add(user);
         for (User current : connected_users.getUsers()) {
             System.out.println("CONNECTED_USERS: " + current);
         }
@@ -165,7 +168,7 @@ public class SocketLogic {
         } catch (IndexOutOfBoundsException e) {
             return getJsonFrame(1, "Raum existiert nicht", new JSONObject(), "join_room_response");
         }
-}
+    }
 
     private JSONObject leave_room(Session session) {
         User current_user = connected_users.getUserBySession(session);
@@ -193,6 +196,15 @@ public class SocketLogic {
         return getJsonFrame(0, "Erfolgreich abgemeldet", new JSONObject(), "logout_user_response");
     }
 
+    private JSONObject register_user(JSONObject data, Session session) {
+        if(data.has("name") && data.has("password")){
+            User user = new User(session,data.getString("name"),data.getString("password"));
+            return new JSONObject();
+        }else{
+            throw new JSONException("Invalid JSON");
+        }
+    }
+
     private void logout(Session session) {
         System.out.println("removing user with session: " + session);
         User user = connected_users.getUserBySession(session);
@@ -206,5 +218,4 @@ public class SocketLogic {
             System.out.println("CONNECTED_USERSWITHREMOVE: " + current);
         }
     }
-}
 }

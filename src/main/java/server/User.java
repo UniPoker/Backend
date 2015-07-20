@@ -9,6 +9,7 @@ public class User {
 
     private Session websession;
     private String name;
+    private String password;
     private int room_index = -1;
     private Card[] hand_cards;
     private String last_action;
@@ -21,10 +22,11 @@ public class User {
      * @param websession Session of connected server.User
      * @param name Name of connected server.User
      */
-    User(Session websession, String name) {
+    User(Session websession, String name, String password) {
         hand_cards = new Card[2];
         this.websession = websession;
         this.name = name;
+        this.password = password;
     }
 
     public Session getWebsession() {
