@@ -31,7 +31,7 @@ public class SocketLogic {
 
     @OnMessage
     public void onWebSocketMessage(String message, Session session) throws IOException {
-        String event = "";
+        String event = "error";
         try {
             System.out.println("onMessage " + message);
             System.out.println("!!!!SESSION!!!! " + session);
@@ -119,8 +119,8 @@ public class SocketLogic {
         if (!(data.getString("user").equals("mustermann") && data.getString("password").equals("123456"))) {
             return getJsonFrame(1, "Anmeldung nicht erfolgreich", new JSONObject(), "login_user_response");
         }
-//        User user = new User(session, data.getString("user"));
-//        connected_users.add(user);
+        User user = new User(session, data.getString("user"), data.getString("password"));
+        connected_users.add(user);
         for (User current : connected_users.getUsers()) {
             System.out.println("CONNECTED_USERS: " + current);
         }
