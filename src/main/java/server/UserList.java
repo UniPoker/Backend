@@ -81,6 +81,18 @@ public class UserList {
         return users;
     }
 
+    public List<User> getUsersExceptUser(User user){
+        List<User> _users = users;
+        _users.removeIf(p -> p == user);
+        return _users;
+    }
+
+    public List<User> getUsersExceptSession(Session session){
+        List<User> _users = users;
+        _users.removeIf(p -> p.getWebsession() == session);
+        return _users;
+    }
+
     public User getUserByIndex(int index){
         return users.get(index);
     }

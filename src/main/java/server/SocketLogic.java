@@ -15,7 +15,7 @@ import java.util.*;
 public class SocketLogic {
 
     private static UserList connected_users = new UserList();
-    private static List<Room> all_rooms = new ArrayList<>();
+    private static RoomList all_rooms = new RoomList();
     private static int room_index = 0;
     private String[] do_not_authorize = new String[]{"login_user"};
 
@@ -65,8 +65,8 @@ public class SocketLogic {
                     response = leave_room(session);
                     break;
                 case "logout_user":
-                response = logout_user(session);
-                break;
+                    response = logout_user(session);
+                    break;
                 default:
                     response = getJsonFrame(99, "unbekannter RequestType", new JSONObject(), "error_response");
             }
@@ -125,12 +125,11 @@ public class SocketLogic {
     }
 
     private JSONObject list_rooms() {
-        System.out.println("LIST ALL ROOMS");
         JSONArray arr = new JSONArray();
-        for (int i = 0; i < all_rooms.size(); i++) {
+        for (int i = 0; i < all_rooms.length; i++) {
             HashMap<String, Integer> map = new HashMap<String, Integer>();
-            map.put("room_id", all_rooms.get(i).getId());
-            map.put("room_seats", all_rooms.get(i).userSize());
+            map.put("room_id", all_rooms.getRoomByIndex(i).getId());
+            map.put("room_seats", all_rooms.getRoomByIndex(i).userSize());
             arr.put(i, map);
         }
         JSONObject response = getJsonFrame(0, "Anfrage erfolgreich", new JSONObject(), "list_rooms_response");
@@ -146,46 +145,42 @@ public class SocketLogic {
             all_rooms.add(room);
             current_user.setRoomIndex(id);
             JSONObject body = new JSONObject().put("room_id", id);
-            return getJsonFrame(0, "Raum erfolgreich angelegt", new JSONObject().accumulate("body", body), "create_room_response");
+            return getJsonFrame(0, "Raum erfolgreich angelegt", body, "create_room_response");
         } else {
             return getJsonFrame(1, "Bereits in Raum", new JSONObject(), "create_room_response");
         }
     }
 
     private JSONObject join_room(JSONObject data, Session session) {
-        if (data.has("room_id")) {
-            int room_id = data.getInt("room_id");
-            Room current_room = null;
-            for (Room room : all_rooms) {
-                if (room.getId() == room_id) {
-                    current_room = room;
-                }
+        try {
+            if (data.has("room_id")) {
+                int room_id = data.getInt("room_id");
+                Room current_room = all_rooms.getRoomByIndex(room_id);
+                User user = connected_users.getUserBySession(session);
+                current_room.joinRoom(user);
+                return getJsonFrame(1, "Erfolgreich Raum beigetreten", new JSONObject().put("room_id", current_room.getId()), "join_room_response");
+            } else {
+                throw new JSONException("no room_id");
             }
-            if (current_room == null) {
-                return getJsonFrame(1, "Raum existiert nicht", new JSONObject(), "join_room_response");
-            }
-            User user = connected_users.getUserBySession(session);
-            current_room.joinRoom(user);
-            return getJsonFrame(1, "Erfolgreich Raum beigetreten", new JSONObject().put("room_id", current_room.getId()), "join_room_response");
-        } else {
-            throw new JSONException("no room_id");
+        } catch (IndexOutOfBoundsException e) {
+            return getJsonFrame(1, "Raum existiert nicht", new JSONObject(), "join_room_response");
         }
-    }
+}
 
     private JSONObject leave_room(Session session) {
         User current_user = connected_users.getUserBySession(session);
-        for (Room room : all_rooms) {
-            if (room.getId() == current_user.getRoomIndex()) {
-                room.leaveRoom(current_user);
-                return getJsonFrame(0, "Raum verlassen", new JSONObject(), "leave_room_response");
-            }
+        int room_id = current_user.getRoomIndex();
+        if (room_id == -1) {
+            return getJsonFrame(1, "Zuvor keinem Raum beigetreten", new JSONObject(), "leave_room_response");
         }
-        return getJsonFrame(1, "Zuvor keinem Raum beigetreten", new JSONObject(), "leave_room_response");
+        Room room = all_rooms.getRoomByIndex(room_id);
+        room.leaveRoom(current_user);
+        return getJsonFrame(0, "Raum verlassen", new JSONObject(), "leave_room_response");
     }
 
     private JSONObject send_message(JSONObject data) {
         int room_id = data.getInt("room_id");
-        Room room = all_rooms.get(room_id);
+        Room room = all_rooms.getRoomByIndex(room_id);
         UserList room_users = room.getAllUsers();
         Pusher push = new Pusher(room_users);
         String message = data.getString("message");
@@ -201,14 +196,15 @@ public class SocketLogic {
     private void logout(Session session) {
         System.out.println("removing user with session: " + session);
         User user = connected_users.getUserBySession(session);
-        for (Room room : all_rooms) {
-            if (room.getId() == user.getRoomIndex()) {
-                room.leaveRoom(user);
-            }
+        int room_id = user.getRoomIndex();
+        if (room_id != -1) {
+            Room room = all_rooms.getRoomByIndex(room_id);
+            room.leaveRoom(user);
         }
         connected_users.removeUserWithSession(session);
         for (server.User current : connected_users.getUsers()) { //debug only
             System.out.println("CONNECTED_USERSWITHREMOVE: " + current);
         }
     }
+}
 }
