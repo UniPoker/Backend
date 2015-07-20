@@ -202,7 +202,7 @@ public class SocketLogic {
         if(data.has("name") && data.has("password")){
             User user = new User(session,data.getString("name"),data.getString("password"));
             registered_users.add(user);
-            return getJsonFrame(0,"Registrierung erfolgreich.",new JSONObject(,"register_user_response"));
+            return getJsonFrame(0,"Registrierung erfolgreich.",new JSONObject(),"register_user_response");
         }else{
             throw new JSONException("Invalid JSON");
         }
