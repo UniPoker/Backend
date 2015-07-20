@@ -92,4 +92,8 @@ public class User {
     public void setLimit(double limit) {
         this.limit = limit;
     }
+
+    public String getPassword() {
+        return password;
+    }
 }

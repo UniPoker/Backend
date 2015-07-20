@@ -116,15 +116,17 @@ public class SocketLogic {
 
     private JSONObject login_user(JSONObject data, Session session) {
         System.out.println("USER WIRD EINGELOGGT!");
-        if (!(data.getString("user").equals("mustermann") && data.getString("password").equals("123456"))) {
+        if(data.has("user") && data.has("password")){
+            for(User user: registered_users.getUsers()){
+                if(user.getName()==data.getString("user") && user.getPassword() == data.getString("password")){
+                    connected_users.add(user);
+                    return getJsonFrame(0, "Anmeldung erfolgreich", new JSONObject(), "login_user_response");
+                }
+            }
             return getJsonFrame(1, "Anmeldung nicht erfolgreich", new JSONObject(), "login_user_response");
+        }else{
+            throw new JSONException("Invalid JSON");
         }
-//        User user = new User(session, data.getString("user"));
-//        connected_users.add(user);
-        for (User current : connected_users.getUsers()) {
-            System.out.println("CONNECTED_USERS: " + current);
-        }
-        return getJsonFrame(0, "Anmeldung erfolgreich", new JSONObject(), "login_user_response");
     }
 
     private JSONObject list_rooms() {
@@ -199,7 +201,8 @@ public class SocketLogic {
     private JSONObject register_user(JSONObject data, Session session) {
         if(data.has("name") && data.has("password")){
             User user = new User(session,data.getString("name"),data.getString("password"));
-            return new JSONObject();
+            registered_users.add(user);
+            return getJsonFrame(0,"Registrierung erfolgreich.",new JSONObject(,"register_user_response"));
         }else{
             throw new JSONException("Invalid JSON");
         }
