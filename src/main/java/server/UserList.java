@@ -47,6 +47,7 @@ public class UserList {
      */
     public void removeUser(User user) {
         users.removeIf(p -> p == user);
+        length --;
     }
 
     /**
@@ -97,9 +98,13 @@ public class UserList {
         return users.get(index);
     }
 
+    public void setUserByIndex(int index,User user){
+        users.set(index, user);
+    }
+
     public User getUserBySession(Session session){
         for(User user : users){
-            if(user.getWebsession().equals(session)){
+            if(user.getWebsession() == session){
                 return user;
             }
         }

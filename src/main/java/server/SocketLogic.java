@@ -8,14 +8,15 @@ import javax.websocket.server.ServerEndpoint;
 import org.json.*;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 //@ClientEndpoint
 @ServerEndpoint("/events/")
 public class SocketLogic {
-
+    private DatabaseConnection con = DatabaseConnection.getInstance();
     private static UserList connected_users = new UserList();
-    private static UserList registered_users = new UserList();
     private static RoomList all_rooms = new RoomList();
     private static int room_index = 0;
     private String[] do_not_authorize = new String[]{"login_user", "register_user"};
@@ -76,16 +77,17 @@ public class SocketLogic {
             }
             session.getBasicRemote().sendObject(response.toString());
         } catch (JSONException e) {
-
             e.printStackTrace();
             session.getBasicRemote().sendText(getJsonFrame(99, "Ungültiges JSON!", new JSONObject(), event + "_response").toString());
         } catch (EncodeException e) {
             e.printStackTrace();
             session.getBasicRemote().sendText(getJsonFrame(99, "Encode Exception!", new JSONObject(), event + "_response").toString());
         } catch (NotLoggedInException e) {
-            System.out.println("DAS WICHTIGE EVENT: " + event);
             e.printStackTrace();
             session.getBasicRemote().sendText(getJsonFrame(99, "Not Logged In!", new JSONObject(), event + "_response").toString());
+        }catch (SQLException e) {
+            e.printStackTrace();
+            session.getBasicRemote().sendText(getJsonFrame(99, "Irgendein SQL Fehler", new JSONObject(), event + "_response").toString());
         } catch (Exception e) {
             e.printStackTrace();
             session.getBasicRemote().sendText(getJsonFrame(99, "Ein Fehler trat auf!", new JSONObject(), event + "_response").toString());
@@ -114,11 +116,21 @@ public class SocketLogic {
         }
     }
 
-    private JSONObject login_user(JSONObject data, Session session) {
+    private JSONObject login_user(JSONObject data, Session session) throws SQLException {
         System.out.println("USER WIRD EINGELOGGT!");
         if(data.has("user") && data.has("password")){
-            for(User user: registered_users.getUsers()){
-                if(user.getName().equals(data.getString("user")) && user.getPassword().equals(data.getString("password"))){
+            ResultSet rs = con.getUserByName(data.getString("user"));
+            if(rs.first()){
+                String password = rs.getString("password");
+                if(data.getString("password").equals(password) ){
+                    User user = new User(session,data.getString("user"),data.getString("password"));
+//                  IN CASE OF UNENDED SESSION i.e. f5
+//                   for(int i = 0; i < connected_users.length; i++){
+//                        if(user.getName().equals(connected_users.getUsers().get(i).getName())){
+//                            connected_users.setUserByIndex(i, user);
+//                            return getJsonFrame(0, "Anmeldung aktualisiert", new JSONObject(), "login_user_response");
+//                        }
+//                    }
                     connected_users.add(user);
                     return getJsonFrame(0, "Anmeldung erfolgreich", new JSONObject(), "login_user_response");
                 }
@@ -197,12 +209,16 @@ public class SocketLogic {
         return getJsonFrame(0, "Erfolgreich abgemeldet", new JSONObject(), "logout_user_response");
     }
 
-    private JSONObject register_user(JSONObject data, Session session) {
+    private JSONObject register_user(JSONObject data, Session session) throws SQLException {
         if(data.has("name") && data.has("password")){
             //TODO hier noch überprüfen ob schon jemand vorhanden ist
-            User user = new User(session,data.getString("name"),data.getString("password"));
-            registered_users.add(user);
-            return getJsonFrame(0,"Registrierung erfolgreich.",new JSONObject(),"register_user_response");
+            ResultSet rs = con.getUserByName(data.getString("name"));
+            if(!rs.next()){
+                con.insertUser(data.getString("name"), data.getString("password"));
+                return getJsonFrame(0,"Registrierung erfolgreich.",new JSONObject(),"register_user_response");
+            }else{
+                return getJsonFrame(1,"Nutzername schon verwendet.",new JSONObject(),"register_user_response");
+            }
         }else{
             throw new JSONException("Invalid JSON");
         }

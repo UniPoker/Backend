@@ -12,3 +12,9 @@ Backend.iml
 .idea/.name
 .idea/artifacts
 .idea/copyright
+Database.trace.db
+Database.h2.db
+Database.lock.db
+.idea/dataSources.local.xml
+.idea/dataSources.xml
+.idea/dataSources.ids
