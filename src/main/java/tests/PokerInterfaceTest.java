@@ -1,7 +1,8 @@
-package server;
+package tests;
 
 import org.junit.Before;
 import org.junit.Test;
+import server.PokerInterface;
 
 import static org.junit.Assert.*;
 
@@ -12,7 +13,7 @@ public class PokerInterfaceTest {
 
     @Before
     public void setUp() throws Exception {
-
+        PokerInterface poker = new PokerInterface();
     }
 
     @Test
