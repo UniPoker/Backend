@@ -2,8 +2,7 @@ package tests;
 
 import org.json.JSONObject;
 import org.junit.*;
-import server.SocketLogic;
-import server.WebsocketServer;
+import server.Server;
 
 import java.net.URI;
 import javax.websocket.Session;
@@ -11,13 +10,13 @@ import static org.junit.Assert.*;
 
 public class RoomTest {
 
-    private static WebsocketServer server;
+    private static Server server;
     public static Session session;
 
     @BeforeClass
     public static void setup() throws Exception {
         System.out.println("Starting...");
-        server = new WebsocketServer(8080);
+        server = new Server(8080);
         server.start();
         URI uri = new URI("ws://localhost:8080/events/");
         session = SocketClient.connect(uri);

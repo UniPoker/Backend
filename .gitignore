@@ -18,3 +18,4 @@ Database.lock.db
 .idea/dataSources.local.xml
 .idea/dataSources.xml
 .idea/dataSources.ids
+Test.h2.db

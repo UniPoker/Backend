@@ -29,6 +29,11 @@ public class User {
         this.password = password;
     }
 
+    public User(Session session) {
+        hand_cards = new Card[2];
+        this.websession = session;
+    }
+
     public Session getWebsession() {
         return websession;
     }

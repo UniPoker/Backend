@@ -110,4 +110,8 @@ public class UserList {
         }
         return null;
     }
+
+    public boolean contains(User user) {
+        return users.contains(user);
+    }
 }

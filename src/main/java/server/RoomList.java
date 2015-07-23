@@ -33,7 +33,7 @@ public class RoomList {
 
     public void add(Room room) {
         rooms.add(room);
-        length ++;
+        length++;
     }
 
     public void removeRoom(Room room) {
@@ -49,14 +49,14 @@ public class RoomList {
         return rooms;
     }
 
-    public Room getRoomByIndex(int index){
+    public Room getRoomByIndex(int index) {
         return rooms.get(index);
     }
 
-    public Room getRoomByUser(User user){
-        for(Room room : rooms){
-            for(User current_user: room.getAllUsers().getUsers()){
-                if(current_user.equals(user)){
+    public Room getRoomByUser(User user) {
+        for (Room room : rooms) {
+            for (User current_user : room.getAllUsers().getUsers()) {
+                if (current_user.equals(user)) {
                     return room;
                 }
             }
@@ -64,12 +64,21 @@ public class RoomList {
         return null;
     }
 
-    public Room getRoomBySession(Session session){
-        for(Room room : rooms){
-            for(User current_user: room.getAllUsers().getUsers()){
-                if(current_user.getWebsession().equals(session)){
+    public Room getRoomBySession(Session session) {
+        for (Room room : rooms) {
+            for (User current_user : room.getAllUsers().getUsers()) {
+                if (current_user.getWebsession().equals(session)) {
                     return room;
                 }
+            }
+        }
+        return null;
+    }
+
+    public Room getRoomByRoomId(int room_id) {
+        for (Room room : rooms) {
+            if (room.getId() == room_id) {
+                return room;
             }
         }
         return null;

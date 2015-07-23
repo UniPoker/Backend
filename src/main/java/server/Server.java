@@ -2,7 +2,6 @@ package server; /**
  * Created by Stefan on 01.04.2015.
  */
 
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
@@ -11,17 +10,17 @@ import javax.websocket.server.ServerContainer;
 
 
 //@ServerEndpoint("/websocket")
-public class WebsocketServer {
+public class Server {
 
-    private Server server;
+    private org.eclipse.jetty.server.Server server;
     private int port;
 
-    public WebsocketServer(int port){
+    public Server(int port){
         this.port = port;
     }
 
     public void start(){
-        server = new Server(this.port);
+        server = new org.eclipse.jetty.server.Server(this.port);
         ServerConnector connector = new ServerConnector(server);
         server.addConnector(connector);
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -30,7 +29,7 @@ public class WebsocketServer {
         try
         {
             ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
-            wscontainer.addEndpoint(SocketLogic.class);
+            wscontainer.addEndpoint(WebsocketEndpoint.class);
             server.start();
 //            server.join();
         }
@@ -46,7 +45,7 @@ public class WebsocketServer {
 
     public static void main(String[] args)
     {
-        WebsocketServer websocketserver = new WebsocketServer(8080);
+        Server websocketserver = new Server(8080);
         websocketserver.start();
     }
 }
