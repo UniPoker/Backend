@@ -18,6 +18,11 @@ public class User {
     private double limit = 1000.00;
 
     /**
+     * ONLY FOR TESTS
+     */
+    public User(){}
+
+    /**
      * Constructor
      * @param websession Session of connected server.User
      * @param name Name of connected server.User

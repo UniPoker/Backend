@@ -70,8 +70,8 @@ public class WebsocketEndpoint {
     }
 
     @OnClose
-    public void onWebSocketClose(CloseReason reason, Session session) {
-//        logout(session);
+    public void onWebSocketClose(CloseReason reason, Session session) throws NotLoggedInException, SQLException {
+        pokerInterface.receive("logout_user", new JSONObject(), connected_users.getUserBySession(session), connected_users, all_rooms);
     }
 
     @OnError

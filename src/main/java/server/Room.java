@@ -18,8 +18,8 @@ public class Room {
      */
     public Room(User user, int id){
         all_users = new UserList(user);
-        user.setRoomIndex(this.id);
         this.id = id;
+        user.setRoomIndex(this.id);
     }
 
     /**
