@@ -19,7 +19,7 @@ public class Room {
     public Room(User user, int id){
         all_users = new UserList(user);
         this.id = id;
-        user.setRoomIndex(this.id);
+        user.setRoomId(this.id);
     }
 
     /**
@@ -29,14 +29,14 @@ public class Room {
     public boolean joinRoom(User user){
         if(all_users.length < MAX_PLAYER){
             all_users.add(user);
-            user.setRoomIndex(this.id);
+            user.setRoomId(this.id);
             return true;
         }
         return false;
     }
 
     public boolean leaveRoom(User user){
-        user.setRoomIndex(-1);
+        user.setRoomId(-1);
         all_users.removeUser(user);
         return true;
     }

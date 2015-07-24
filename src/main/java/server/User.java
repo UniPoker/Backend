@@ -10,7 +10,7 @@ public class User {
     private Session websession;
     private String name;
     private String password;
-    private int room_index = -1;
+    private int room_id = -1;
     private Card[] hand_cards;
     private String last_action;
     private boolean has_folded;
@@ -55,12 +55,12 @@ public class User {
         this.name = name;
     }
 
-    public int getRoomIndex() {
-        return room_index;
+    public int getRoomId() {
+        return room_id;
     }
 
-    public void setRoomIndex(int room_index) {
-        this.room_index = room_index;
+    public void setRoomId(int room_id) {
+        this.room_id = room_id;
     }
 
     public Card[] getHandCards() {

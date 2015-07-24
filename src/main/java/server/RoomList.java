@@ -1,8 +1,11 @@
 package server;
 
+import org.json.JSONArray;
+
 import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -34,6 +37,18 @@ public class RoomList {
     public void add(Room room) {
         rooms.add(room);
         length++;
+    }
+
+    /**
+     * creates and returns a new room and let the given user join this room
+     *
+     * @param joining_user
+     * @return Room
+     */
+    public Room addNewRoom(User joining_user) {
+        Room room = new Room(joining_user, (this.length + 1));
+        this.add(room);
+        return room;
     }
 
     public void removeRoom(Room room) {
@@ -82,5 +97,21 @@ public class RoomList {
             }
         }
         return null;
+    }
+
+    /**
+     * returns a JSONArray with the room_id and the number of seats of every room
+     *
+     * @return JSONArray
+     */
+    public JSONArray getInterfaceRoomList() {
+        JSONArray arr = new JSONArray();
+        for (Room room : rooms) {
+            HashMap<String, Integer> map = new HashMap<>();
+            map.put("room_id", room.getId());
+            map.put("room_seats", room.userSize());
+            arr.put(map);
+        }
+        return arr;
     }
 }

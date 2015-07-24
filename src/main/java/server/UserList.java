@@ -39,7 +39,7 @@ public class UserList {
      */
     public void add(User user) {
         users.add(user);
-        length ++;
+        length++;
     }
 
     /**
@@ -47,7 +47,7 @@ public class UserList {
      */
     public void removeUser(User user) {
         users.removeIf(p -> p == user);
-        length --;
+        length--;
     }
 
     /**
@@ -57,7 +57,7 @@ public class UserList {
      */
     public void removeUserWithSession(Session session) {
         users.removeIf(p -> p.getWebsession() == session);
-        length --;
+        length--;
     }
 
     /**
@@ -82,29 +82,29 @@ public class UserList {
         return users;
     }
 
-    public List<User> getUsersExceptUser(User user){
+    public List<User> getUsersExceptUser(User user) {
         List<User> _users = users;
         _users.removeIf(p -> p == user);
         return _users;
     }
 
-    public List<User> getUsersExceptSession(Session session){
+    public List<User> getUsersExceptSession(Session session) {
         List<User> _users = users;
         _users.removeIf(p -> p.getWebsession() == session);
         return _users;
     }
 
-    public User getUserByIndex(int index){
+    public User getUserByIndex(int index) {
         return users.get(index);
     }
 
-    public void setUserByIndex(int index,User user){
+    public void setUserByIndex(int index, User user) {
         users.set(index, user);
     }
 
-    public User getUserBySession(Session session){
-        for(User user : users){
-            if(user.getWebsession() == session){
+    public User getUserBySession(Session session) {
+        for (User user : users) {
+            if (user.getWebsession().getId() == session.getId()) {
                 return user;
             }
         }

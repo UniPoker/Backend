@@ -6,6 +6,7 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by loster on 27.05.2015.
@@ -16,9 +17,7 @@ public class Pusher {
 
     public Pusher(UserList users) {
         sessions = new ArrayList<>();
-        for (User user : users.getUsers()) {
-            sessions.add(user.getWebsession());
-        }
+        sessions.addAll(users.getUsers().stream().map(User::getWebsession).collect(Collectors.toList()));
     }
 
     public void pushToAll(String message, String event) {
