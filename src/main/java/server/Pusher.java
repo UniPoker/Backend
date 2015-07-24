@@ -14,16 +14,25 @@ import java.util.stream.Collectors;
 public class Pusher {
 
     List<Session> sessions;
+    String sender_name;
+    int room_id;
 
-    public Pusher(UserList users) {
+    public Pusher(UserList users, String sender_name, int room_id) {
         sessions = new ArrayList<>();
         sessions.addAll(users.getUsers().stream().map(User::getWebsession).collect(Collectors.toList()));
+        this.sender_name = sender_name;
+        this.room_id = room_id;
     }
 
     public void pushToAll(String message, String event) {
         try {
             for (Session session : sessions) {
-                session.getBasicRemote().sendText(getJsonFrame(0,"Nachricht erhalten",new JSONObject().put("message", message),event).toString());
+                JSONObject body = new JSONObject();
+                body.put("message", message);
+                body.put("room_id", room_id);
+                body.put("sender", sender_name);
+                JSONObject json = Helper.getJsonFrame(0, "Nachricht erhalten", body, event);
+                session.getBasicRemote().sendText(json.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -35,9 +44,4 @@ public class Pusher {
         sessions.removeIf((p -> p == user.getWebsession()));
     }
 
-    private JSONObject getJsonFrame(int status, String message, JSONObject body, String event) {
-        JSONObject frame =  new JSONObject().put("status", status).put("message", message).put("event", event);
-        frame.accumulate("body", body);
-        return frame;
-    }
 }

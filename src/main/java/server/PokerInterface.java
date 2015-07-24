@@ -28,7 +28,7 @@ public class PokerInterface {
             case "create_room":
                 return create_room(current_user, all_rooms);
             case "send_message":
-                return send_message(data, all_rooms);
+                return send_message(data, all_rooms, connected_users, current_user);
             case "join_room":
                 return join_room(data, current_user, all_rooms, connected_users);
             case "leave_room":
@@ -105,14 +105,14 @@ public class PokerInterface {
         return Helper.getJsonFrame(0, "Raum verlassen", new JSONObject(), "leave_room_response");
     }
 
-    private JSONObject send_message(JSONObject data, RoomList all_rooms) {
+    private JSONObject send_message(JSONObject data, RoomList all_rooms, UserList connected_users, User current_user) {
         int room_id = data.getInt("room_id");
         Room room = all_rooms.getRoomByRoomId(room_id);
-        if(room == null){
+        if(room == null && room_id != -1){
             return Helper.getJsonFrame(1, "Raum nicht vorhanden", new JSONObject(), "send_message_response");
         }
-        UserList room_users = room.getAllUsers();
-        Pusher push = new Pusher(room_users);
+        UserList room_users = (room == null) ? connected_users : room.getAllUsers();
+        Pusher push = new Pusher(room_users, current_user.getName(), room_id);
         String message = data.getString("message");
         push.pushToAll(message, "chat_notification");
         return Helper.getJsonFrame(0, "Nachricht erfolgreich gesendet", new JSONObject(), "send_message_response");
