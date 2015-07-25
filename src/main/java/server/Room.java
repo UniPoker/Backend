@@ -13,21 +13,21 @@ public class Room {
     private int id;
 
     /**
-     * @param User user
-     * @param int id
+     * @param user
+     * @param id
      */
-    public Room(User user, int id){
+    public Room(User user, int id) {
         all_users = new UserList(user);
         this.id = id;
         user.setRoomId(this.id);
     }
 
     /**
-     * @param User user
+     * @param user
      * @return boolean when connect
      */
-    public boolean joinRoom(User user){
-        if(all_users.length < MAX_PLAYER){
+    public boolean joinRoom(User user) {
+        if (all_users.length < MAX_PLAYER) {
             all_users.add(user);
             user.setRoomId(this.id);
             return true;
@@ -35,21 +35,21 @@ public class Room {
         return false;
     }
 
-    public boolean leaveRoom(User user){
+    public boolean leaveRoom(User user) {
         user.setRoomId(-1);
         all_users.removeUser(user);
         return true;
     }
 
-    public int userSize(){
+    public int userSize() {
         return all_users.length;
     }
 
-    public int getId(){
+    public int getId() {
         return id;
     }
 
-    public UserList getAllUsers(){
+    public UserList getAllUsers() {
         return all_users;
     }
 

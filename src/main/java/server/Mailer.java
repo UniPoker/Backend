@@ -21,13 +21,27 @@ public class Mailer {
     private String from;
     private String password;
 
+    /**
+     * creates a new instance of the mailer
+     */
     private Mailer() {
     }
 
+    /**
+     * returns the instance of the mailer so only one instance is active at the same time
+     *
+     * @return instance of Mailer
+     */
     public static Mailer getInstance() {
         return MAILER_INSTANCE;
     }
 
+    /**
+     * reads the HTML Template of the given name and creates a string of it
+     *
+     * @param fileName the given filename (e.g. "Registrierung")
+     * @return returns a string
+     */
     public String readFile(String fileName) {
         String line;
         StringBuffer sb = new StringBuffer();
@@ -44,6 +58,13 @@ public class Mailer {
         return sb.toString();
     }
 
+    /**
+     * sends the mail with the given subject to the given mail
+     *
+     * @param to      String of the mail to be sent to
+     * @param subject the subject of the mail
+     * @throws MessagingException if there are any errors
+     */
     public void sendMail(String to, String subject) throws MessagingException {
         Properties properties = System.getProperties();
         properties.setProperty("mail.smtp.host", host);

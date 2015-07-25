@@ -46,6 +46,7 @@ public class UserList {
      * @param user server.User to delete from server.UserList
      */
     public void removeUser(User user) {
+        //TODO was passiert wenn wir hier einen User reinreichen der nicht in der Liste war? dann ist die length einen runter aber kein user gelöscht?!
         users.removeIf(p -> p == user);
         length--;
     }
