@@ -141,12 +141,23 @@ public class PokerInterface {
      */
     private JSONObject join_room(JSONObject data, User current_user, RoomList all_rooms) {
         int room_id = data.getInt("room_id");
-        Room current_room = all_rooms.getRoomByRoomId(room_id);
-        if (current_room == null) {
+        int old_room_id = current_user.getRoomId();
+
+        Room joining_room = all_rooms.getRoomByRoomId(room_id);
+        if (joining_room == null) {
             return Helper.getJsonFrame(1, "Raum existiert nicht", new JSONObject(), "join_room_response");
         }
-        current_room.joinRoom(current_user);
-        return Helper.getJsonFrame(0, "Erfolgreich Raum beigetreten", new JSONObject().put("room_id", current_room.getId()), "join_room_response");
+
+        boolean is_joined = joining_room.joinRoom(current_user);
+        if(is_joined){
+            Room current_room = all_rooms.getRoomByRoomId(old_room_id);
+            if(current_room != null){
+                current_room.leaveRoom(current_user);
+            }
+            return Helper.getJsonFrame(0, "Erfolgreich Raum beigetreten", new JSONObject().put("room_id", joining_room.getId()), "join_room_response");
+        }else{
+            return Helper.getJsonFrame(1, "User schon im Raum", new JSONObject(), "join_room_response");
+        }
     }
 
     private JSONObject leave_room(User user, RoomList all_rooms) {
@@ -180,6 +191,7 @@ public class PokerInterface {
     //doppelt damit auch andere methoden ausloggen können
     private void logoutUser(User user, RoomList all_rooms, UserList connected_users) {
         int room_id = user.getRoomId();
+        System.out.println("USER WIRD AUSGELOGGT MIT ROOM ID: " + room_id);
         Room room = all_rooms.getRoomByRoomId(room_id);
         if (room != null) {
             room.leaveRoom(user);

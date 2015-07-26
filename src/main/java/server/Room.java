@@ -27,7 +27,7 @@ public class Room {
      * @return boolean when connect
      */
     public boolean joinRoom(User user) {
-        if (all_users.length < MAX_PLAYER) {
+        if ((all_users.length < MAX_PLAYER) && !(all_users.contains(user))) {
             all_users.add(user);
             user.setRoomId(this.id);
             return true;
