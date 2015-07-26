@@ -16,13 +16,25 @@ public class PokerInterface {
     private String[] do_not_authorize = new String[]{"login_user", "register_user"};
     private DatabaseConnection con = DatabaseConnection.getInstance();
 
+    /**
+     * the entry point of the PokerInterface. Is called by the WebsocketEndpoint and gets all the given information to fire the right event
+     *
+     * @param event           the event that needs to be triggered
+     * @param data            the data that is needed for the event
+     * @param current_user    the current user who is calling the interface
+     * @param connected_users all users who are connected to the server
+     * @param all_rooms       all rooms that are created
+     * @return returns a JSONObject with the response of the event
+     * @throws NotLoggedInException is thrown if the current_user ist not logged in and is not calling a method where is doesn't need to log in
+     * @throws SQLException         is thrown if there are any SQL Errors
+     */
     public JSONObject receive(String event, JSONObject data, User current_user, UserList connected_users, RoomList all_rooms) throws NotLoggedInException, SQLException {
         if (!Arrays.asList(do_not_authorize).contains(event)) {
             isLoggedIn(connected_users, current_user);
         }
         switch (event) {
             case "login_user":
-                return login_user(data, current_user, connected_users);
+                return login_user(data, current_user, connected_users, all_rooms);
             case "list_rooms":
                 return list_rooms(all_rooms);
             case "create_room":
@@ -30,7 +42,7 @@ public class PokerInterface {
             case "send_message":
                 return send_message(data, all_rooms, connected_users, current_user);
             case "join_room":
-                return join_room(data, current_user, all_rooms, connected_users);
+                return join_room(data, current_user, all_rooms);
             case "leave_room":
                 return leave_room(current_user, all_rooms);
             case "logout_user":
@@ -42,14 +54,30 @@ public class PokerInterface {
         }
     }
 
-
+    /**
+     * checks if the given user is already logged in.
+     *
+     * @param connected_users all user who are already logged_in
+     * @param user            the user who needs to be checked if he is logged in
+     * @throws NotLoggedInException if the user is not logged in
+     */
     private void isLoggedIn(UserList connected_users, User user) throws NotLoggedInException {
         if (!connected_users.contains(user)) {
             throw new NotLoggedInException();
         }
     }
 
-    private JSONObject login_user(JSONObject data, User current_user, UserList connected_users) throws SQLException {
+    /**
+     * possible event of the PokerInterface.
+     * Logs the requesting user in or renews his web session if already logged in
+     *
+     * @param data            the data containing all information (need to contain "user" and "password")
+     * @param current_user    the requesting user
+     * @param connected_users all connected users
+     * @return JSONObject with the response (status: 0 if OK, 1 if not)
+     * @throws SQLException
+     */
+    private JSONObject login_user(JSONObject data, User current_user, UserList connected_users, RoomList all_rooms) throws SQLException {
         String request_user = data.getString("user");
         String request_password = data.getString("password");
         ResultSet rs = con.getUserByName(request_user);
@@ -57,8 +85,10 @@ public class PokerInterface {
             String db_password = rs.getString("password");
             if (request_password.equals(db_password)) {
                 User user = new User(current_user.getWebsession(), data.getString("user"), data.getString("password"));
-                User connected_user = connected_users.getUserBySession(user.getWebsession());
+                User connected_user = connected_users.getUserByName(user.getName());
                 if (connected_user != null) {
+                    logoutUser(connected_user, all_rooms, connected_users);
+                    connected_users.add(user);
                     return Helper.getJsonFrame(0, "Anmeldung aktualisiert", new JSONObject(), "login_user_response");
                 }
                 connected_users.add(user);
@@ -68,6 +98,13 @@ public class PokerInterface {
         return Helper.getJsonFrame(1, "Anmeldung nicht erfolgreich", new JSONObject(), "login_user_response");
     }
 
+    /**
+     * possible event of PokerInterface.
+     * creates a JSONObject with the details of every room
+     *
+     * @param all_rooms every room that is created
+     * @return JSONObject of the detailed room list (e.g. {body: {[room_id: 1, seats: 0], [room_id:2, seats: 1}}
+     */
     private JSONObject list_rooms(RoomList all_rooms) {
         JSONArray arr = all_rooms.getInterfaceRoomList();
         JSONObject response = Helper.getJsonFrame(0, "Anfrage erfolgreich", new JSONObject(), "list_rooms_response");
@@ -75,6 +112,14 @@ public class PokerInterface {
         return response;
     }
 
+    /**
+     * possible event of PokerInterface.
+     * creates a new room and lets the requesting user join it
+     *
+     * @param current_user requesting user
+     * @param all_rooms    list of all rooms so the room can be added
+     * @return the id of the new room or the message that the user is already in a room
+     */
     private JSONObject create_room(User current_user, RoomList all_rooms) {
         if (current_user.getRoomId() == -1) {
             Room new_room = all_rooms.addNewRoom(current_user);
@@ -85,13 +130,22 @@ public class PokerInterface {
         }
     }
 
-    private JSONObject join_room(JSONObject data, User user, RoomList all_rooms, UserList connected_users) {
+    /**
+     * possible event of PokerInterface.
+     * lets the requesting user join a room if it exists
+     *
+     * @param data         the data so we can get "room_id"
+     * @param current_user the requesting user
+     * @param all_rooms    list of all rooms so the room can be found by room_id
+     * @return the room id if the user is joined successful
+     */
+    private JSONObject join_room(JSONObject data, User current_user, RoomList all_rooms) {
         int room_id = data.getInt("room_id");
         Room current_room = all_rooms.getRoomByRoomId(room_id);
         if (current_room == null) {
             return Helper.getJsonFrame(1, "Raum existiert nicht", new JSONObject(), "join_room_response");
         }
-        current_room.joinRoom(user);
+        current_room.joinRoom(current_user);
         return Helper.getJsonFrame(0, "Erfolgreich Raum beigetreten", new JSONObject().put("room_id", current_room.getId()), "join_room_response");
     }
 
@@ -108,7 +162,7 @@ public class PokerInterface {
     private JSONObject send_message(JSONObject data, RoomList all_rooms, UserList connected_users, User current_user) {
         int room_id = data.getInt("room_id");
         Room room = all_rooms.getRoomByRoomId(room_id);
-        if(room == null && room_id != -1){
+        if (room == null && room_id != -1) {
             return Helper.getJsonFrame(1, "Raum nicht vorhanden", new JSONObject(), "send_message_response");
         }
         UserList room_users = (room == null) ? connected_users : room.getAllUsers();
@@ -119,13 +173,18 @@ public class PokerInterface {
     }
 
     private JSONObject logout_user(User user, RoomList all_rooms, UserList connected_users) {
+        logoutUser(user, all_rooms, connected_users);
+        return Helper.getJsonFrame(0, "Erfolgreich abgemeldet", new JSONObject(), "logout_user_response");
+    }
+
+    //doppelt damit auch andere methoden ausloggen können
+    private void logoutUser(User user, RoomList all_rooms, UserList connected_users) {
         int room_id = user.getRoomId();
         Room room = all_rooms.getRoomByRoomId(room_id);
-        if(room != null){
+        if (room != null) {
             room.leaveRoom(user);
         }
         connected_users.removeUser(user);
-        return Helper.getJsonFrame(0, "Erfolgreich abgemeldet", new JSONObject(), "logout_user_response");
     }
 
     private JSONObject register_user(JSONObject data) throws SQLException {

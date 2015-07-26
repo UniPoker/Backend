@@ -112,6 +112,19 @@ public class UserList {
         return null;
     }
 
+    public User getUserByName(String name) {
+        for (User user : users) {
+            if (user.getName().equals(name)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    public int getIndexOfUser(User user) {
+        return users.indexOf(user);
+    }
+
     public boolean contains(User user) {
         return users.contains(user);
     }
