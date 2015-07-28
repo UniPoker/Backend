@@ -19,3 +19,4 @@ Database.lock.db
 .idea/dataSources.xml
 .idea/dataSources.ids
 Test.h2.db
+Test.lock.db

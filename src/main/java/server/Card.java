@@ -14,7 +14,7 @@ public class Card {
      * create a new Card with the given value and symbol
      *
      * @param value  the value of the card, represented by an Integer
-     * @param symbol the symbol of the card, represented by a String ("Herz","Pik","Kreuz","Karo")
+     * @param symbol the symbol of the card, represented by a String ("hearts","spades","clubs","diamonds")
      */
     public Card(int value, String symbol) {
         this.value = value;
