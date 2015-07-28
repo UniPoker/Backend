@@ -51,9 +51,39 @@ public class PokerInterface {
                 return register_user(data);
             case "start_round":
                 return start_round(all_rooms, data);
+            case "do_bet":
+                return do_bet(all_rooms, data);
+            case "do_check":
+                return do_check(all_rooms, data);
+            case "do_call":
+                return do_call(all_rooms, data);
+            case "do_fold":
+                return do_fold(all_rooms, data);
+            case "do_raise":
+                return do_raise(all_rooms, data);
             default:
                 return Helper.getJsonFrame(99, "unbekannter RequestType", new JSONObject(), "error_response");
         }
+    }
+
+    private JSONObject do_bet(RoomList all_rooms, JSONObject data) {
+        return null;
+    }
+
+    private JSONObject do_call(RoomList all_rooms, JSONObject data) {
+        return null;
+    }
+
+    private JSONObject do_check(RoomList all_rooms, JSONObject data) {
+        return null;
+    }
+
+    private JSONObject do_raise(RoomList all_rooms, JSONObject data) {
+        return null;
+    }
+
+    private JSONObject do_fold(RoomList all_rooms, JSONObject data) {
+        return null;
     }
 
     /**

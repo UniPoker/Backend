@@ -23,8 +23,10 @@ public class Game {
     private User big_blind;
 
     private User current;
+    private User previous;
     private User first;
 
+    private List<String> lastActions;
     private List<Integer> pod;
     private int blind_index = 0;
     private final int SMALL_BLIND_VALUE = 5;
@@ -94,7 +96,7 @@ public class Game {
         if (isCurrent(player)) {
             pod.add(getLastBet() + raise);
             first = player;
-            player.setLastAction(Actions.RAISE);
+            lastActions.add(Actions.RAISE);
             setNextUser(player);
         }
     }
@@ -111,7 +113,7 @@ public class Game {
     public void doBet(User player, int bet) {
         if (isCurrent(player)) {
             pod.add(bet);
-            player.setLastAction(Actions.BET);
+            lastActions.add(Actions.BET);
             setNextUser(player);
         }
     }
@@ -128,7 +130,7 @@ public class Game {
         if (isCurrent(player)) {
             int bet = getLastBet();
             pod.add(bet);
-            player.setLastAction(Actions.CALL);
+            lastActions.add(Actions.CALL);
             setNextUser(player);
         }
     }
@@ -143,8 +145,8 @@ public class Game {
      */
     public void doCheck(User player) {
         if (isCurrent(player)) {
-            if (active_players.getUserByIndex(active_players.getUsers().indexOf(player) - 1).getLastAction() == Actions.CHECK || player.equals(first)) {
-                player.setLastAction(Actions.CHECK);
+            if (lastActionEquals(Actions.CHECK) || player == first) {
+                lastActions.add(Actions.CHECK);
                 setNextUser(player);
             }
         }
@@ -160,17 +162,13 @@ public class Game {
         if (isCurrent(player)) {
             int i = 0;
             User possible_winner = null;
-            player.setHasFolded(true);
-            player.setLastAction(Actions.FOLD);
-            for (User user : active_players.getUsers()) {
-                if (!user.hasFolded()) {
-                    i++;
-                    possible_winner = user;
-                }
-            }
-            if (i == 1) {
+            lastActions.add(Actions.FOLD);
+            active_players.removeUser(player);
+            if (active_players.length == 1) {
+                possible_winner = active_players.getUserByIndex(0);
                 noPlayersLeft(possible_winner);
             }
+            setNextUser(player);
         }
     }
 
@@ -212,11 +210,12 @@ public class Game {
      * @param current_player the current player who did the last action
      */
     private void setNextUser(User current_player) {
+        previous = current_player;
         int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
         User person = active_players.getUserByIndex(index);
-        if (person.hasFolded()) {
-            setNextUser(person);
-        }
+//        if (person.hasFolded()) {
+//            setNextUser(person);
+//        }
         current = person;
         if (current == first) {
             if (last_turn) {
@@ -234,11 +233,11 @@ public class Game {
      */
     private void setBlindPlayers() {
         small_blind = active_players.getUserByIndex(blind_index);
-        if(small_blind.payMoney(SMALL_BLIND_VALUE)){
+        if (small_blind.payMoney(SMALL_BLIND_VALUE)) {
             pod.add(SMALL_BLIND_VALUE);
         }
         big_blind = active_players.getUserByIndex(raiseBlindIndex());
-        if(big_blind.payMoney(BIG_BLIND_VALUE)){
+        if (big_blind.payMoney(BIG_BLIND_VALUE)) {
             pod.add(BIG_BLIND_VALUE);
         }
     }
@@ -252,6 +251,7 @@ public class Game {
         active_players = new UserList(players.getUsers());
         active_pusher = new Pusher(active_players);
         pod = new ArrayList<>();
+        lastActions = new ArrayList<>();
         pod.add(0);
         board = new Card[5];
         card_stack = new CardStack();
@@ -259,6 +259,7 @@ public class Game {
         setBlindPlayers();
         setNextUser(big_blind);
         first = current;
+        previous = active_players.getPreviousUser(first);
         is_running = true;
         for (User user : active_players.getUsers()) {
             JSONArray arr = new JSONArray();
@@ -270,8 +271,22 @@ public class Game {
             body.put("your_turn", isCurrent(user));
             body.put("pod", getPodValue());
             body.put("your_money", user.getLimit());
+            body.put("available_methods", getAvailableMethods(user));
             active_pusher.pushToSingle("round_starts_notification", body, user.getWebsession());
         }
+    }
+
+    //TODO möglicher Weise fehlerhaft!!!
+    private JSONObject getAvailableMethods(User user) {
+        JSONObject _available_methods = new JSONObject();
+        if (isCurrent(user)) {
+            _available_methods.put(Actions.CHECK, lastActionEquals(Actions.CHECK) || user == first);
+            _available_methods.put(Actions.FOLD, true);
+            _available_methods.put(Actions.BET, first == user || lastActionEquals(Actions.CHECK) || lastActions.isEmpty());
+            _available_methods.put(Actions.CALL, lastActionEquals(Actions.BET) || lastActionEquals(Actions.RAISE));
+            _available_methods.put(Actions.RAISE, first != user || lastActionEquals(Actions.BET) || lastActionEquals(Actions.CHECK));
+        }
+        return _available_methods;
     }
 
     /**
@@ -320,5 +335,13 @@ public class Game {
 //        int _index = blind_index;
         blind_index = ++blind_index % active_players.length;
         return blind_index;
+    }
+
+    private boolean lastActionEquals(String action) {
+        if(!lastActions.isEmpty()){
+            return lastActions.get(lastActions.size() - 1).equals(action);
+        }else{
+            return false;
+        }
     }
 }

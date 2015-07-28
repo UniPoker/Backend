@@ -148,4 +148,8 @@ public class UserList {
         }
         return arr;
     }
+
+    public User getPreviousUser(User user) {
+        return this.getUserByIndex((users.indexOf(user) - 1 % length + length) % length) ;
+    }
 }

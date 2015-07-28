@@ -12,8 +12,6 @@ public class User {
     private String password;
     private int room_id = -1;
     private Card[] hand_cards;
-    private String last_action;
-    private boolean has_folded;
 
     private double limit = 1000.00;
 
@@ -88,22 +86,6 @@ public class User {
 
     public void resetHandCards() {
         hand_cards = new Card[2];
-    }
-
-    public String getLastAction() {
-        return last_action;
-    }
-
-    public void setLastAction(String last_action) {
-        this.last_action = last_action;
-    }
-
-    public boolean hasFolded() {
-        return has_folded;
-    }
-
-    public void setHasFolded(boolean has_folded) {
-        this.has_folded = has_folded;
     }
 
     public double getLimit() {
