@@ -152,4 +152,10 @@ public class UserList {
     public User getPreviousUser(User user) {
         return this.getUserByIndex((users.indexOf(user) - 1 % length + length) % length) ;
     }
+
+    public void resetAllHandCards(){
+        for(User user : users){
+            user.resetHandCards();
+        }
+    }
 }

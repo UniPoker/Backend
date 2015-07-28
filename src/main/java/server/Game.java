@@ -251,6 +251,7 @@ public class Game {
      */
     private void initRound() {
         active_players = new UserList(players.getUsers());
+        active_players.resetAllHandCards();
         active_pusher = new Pusher(active_players);
         pod = new ArrayList<>();
         lastActions = new ArrayList<>();

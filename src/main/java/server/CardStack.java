@@ -15,7 +15,7 @@ public class CardStack {
      * creates a new CardStack and initializes all the cards with their value (shuffled)
      */
     public CardStack() {
-        cards = initAllCards();
+        initAllCards();
     }
 
     /**
@@ -39,7 +39,7 @@ public class CardStack {
      *
      * @return returns the shuffled Cards
      */
-    private Stack<Card> initAllCards() {
+    private void initAllCards() {
         cards = new Stack<>();
 
         for (String symbol : POSSIBLE_SYMBOLS) {
@@ -48,7 +48,6 @@ public class CardStack {
             }
         }
         shuffle();
-        return cards;
     }
 
 }
