@@ -1,5 +1,7 @@
 package server;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,10 +10,13 @@ import java.util.List;
  */
 public class Game {
 
+    private Pusher pusher;
+
     private CardStack card_stack;
     private Card[] board;
 
     private UserList players;
+    private UserList active_players; //all players in current round
     private User small_blind;
     private User big_blind;
 
@@ -22,6 +27,7 @@ public class Game {
     private int blind_index = 0;
 
     private boolean last_turn = false;
+    private boolean is_running = false;
 
     /**
      * creates a new instance of Game initialized with the given Players
@@ -30,7 +36,8 @@ public class Game {
      */
     public Game(UserList players) {
         this.players = players;
-        startRound();
+        pusher = new Pusher(this.players);
+//        startRound();//Falls Game mal später gestartet wird!
     }
 
     /**
@@ -39,7 +46,11 @@ public class Game {
      * @param player the joining User
      */
     public void joinGame(User player) {
-        players.add(player);
+        JSONObject body = new JSONObject();
+        body.put("body", players.getInterfaceUserList());
+        pusher.pushToAll("user_joined_notification", body);
+        pusher.addUser(player);
+//        startRound();
     }
 
     /**
@@ -48,7 +59,10 @@ public class Game {
      * @param player the User to be removed
      */
     public void leaveGame(User player) {
-        players.removeUser(player);
+        pusher.removeUser(player);
+        JSONObject body = new JSONObject();
+        body.put("body", players.getInterfaceUserList());
+        pusher.pushToAll("user_left_notification", body);
     }
 
     /**
@@ -57,7 +71,7 @@ public class Game {
     public void startRound() {
         //TODO sollte das vielleicht boolean sein um zu wissen ob es los geht oder nicht?
         //TODO das ganze bei den anderen Methoden auch  (doRaise...)
-        if (players.length > 2) {
+        if (players.length >= 2 && !is_running) {
             initRound();
         }
     }
@@ -156,7 +170,7 @@ public class Game {
     }
 
     /**
-     * TODO hjier einf+ügen
+     * TODO hier einfügen
      *
      * @param possible_winner
      */
@@ -193,13 +207,15 @@ public class Game {
      * @param current_player the current player who did the last action
      */
     private void setNextUser(User current_player) {
-        User person = players.getUserByIndex(players.getUsers().indexOf(current_player) + 1);
+        int index = (players.getUsers().indexOf(current_player) + 1) % players.length;
+        User person = players.getUserByIndex(index);
         if (person.hasFolded()) {
             setNextUser(person);
         }
         current = person;
         if (current.equals(first)) {
             if (last_turn) {
+                is_running = false;
                 //Karten verwerten + Sieger ermitteln
             } else {
                 dealBoardCards();
@@ -213,7 +229,7 @@ public class Game {
      */
     private void setBlindPlayers() {
         small_blind = players.getUserByIndex(blind_index);
-        big_blind = players.getUserByIndex(++blind_index);
+        big_blind = players.getUserByIndex(raiseBlindIndex());
     }
 
     /**
@@ -222,14 +238,18 @@ public class Game {
      * sets the player who does his first action
      */
     private void initRound() {
+        active_players = players;
         pod = new ArrayList<>();
         pod.add(0);
         board = new Card[5];
         card_stack = new CardStack();
         dealCards();
         setBlindPlayers();
-        current = players.getUserByIndex(blind_index + 1);
+        setNextUser(big_blind);
         first = current;
+        is_running = true;
+        JSONObject body = new JSONObject();
+        pusher.pushToAll("round_starts_notification", body);
     }
 
     /**
@@ -271,5 +291,11 @@ public class Game {
     private int getPodValue() {
         int sum = pod.stream().mapToInt(Integer::intValue).sum();
         return sum;
+    }
+
+    private int raiseBlindIndex(){
+//        int _index = blind_index;
+        blind_index = ++blind_index % players.length;
+        return blind_index;
     }
 }

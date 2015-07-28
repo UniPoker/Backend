@@ -1,8 +1,11 @@
 package server;
 
+import org.json.JSONArray;
+
 import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -47,8 +50,10 @@ public class UserList {
      */
     public void removeUser(User user) {
         //TODO was passiert wenn wir hier einen User reinreichen der nicht in der Liste war? dann ist die length einen runter aber kein user gelöscht?!
-        users.removeIf(p -> p == user);
-        length--;
+        boolean removed = users.removeIf(p -> p == user);
+        if(removed){
+            length--;
+        }
     }
 
     /**
@@ -127,5 +132,15 @@ public class UserList {
 
     public boolean contains(User user) {
         return users.contains(user);
+    }
+
+    public JSONArray getInterfaceUserList() {
+        JSONArray arr = new JSONArray();
+        for (User user : users) {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("user_name", user.getName());
+            arr.put(map);
+        }
+        return arr;
     }
 }

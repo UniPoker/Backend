@@ -40,7 +40,7 @@ public class CardStack {
      * @return returns the shuffled Cards
      */
     private Stack<Card> initAllCards() {
-        Stack<Card> cards = new Stack<>();
+        cards = new Stack<>();
 
         for (String symbol : POSSIBLE_SYMBOLS) {
             for (int value : POSSIBLE_VALUES) {

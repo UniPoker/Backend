@@ -49,6 +49,8 @@ public class PokerInterface {
                 return logout_user(current_user, all_rooms, connected_users);
             case "register_user":
                 return register_user(data);
+            case "start_round":
+                return start_round(all_rooms, data);
             default:
                 return Helper.getJsonFrame(99, "unbekannter RequestType", new JSONObject(), "error_response");
         }
@@ -149,13 +151,15 @@ public class PokerInterface {
         }
 
         boolean is_joined = joining_room.joinRoom(current_user);
-        if(is_joined){
+        if (is_joined) {
             Room current_room = all_rooms.getRoomByRoomId(old_room_id);
-            if(current_room != null){
+            if (current_room != null) {
                 current_room.leaveRoom(current_user);
             }
-            return Helper.getJsonFrame(0, "Erfolgreich Raum beigetreten", new JSONObject().put("room_id", joining_room.getId()), "join_room_response");
-        }else{
+            JSONObject body = new JSONObject();
+            body.put("room_id", joining_room.getId());
+            return Helper.getJsonFrame(0, "Erfolgreich Raum beigetreten", body, "join_room_response");
+        } else {
             return Helper.getJsonFrame(1, "User schon im Raum", new JSONObject(), "join_room_response");
         }
     }
@@ -177,10 +181,24 @@ public class PokerInterface {
             return Helper.getJsonFrame(1, "Raum nicht vorhanden", new JSONObject(), "send_message_response");
         }
         UserList room_users = (room == null) ? connected_users : room.getAllUsers();
-        Pusher push = new Pusher(room_users, current_user.getName(), room_id);
         String message = data.getString("message");
-        push.pushToAll(message, "chat_notification");
+        JSONObject body = new JSONObject();
+        body.put("message", message);
+        body.put("room_id", room_id);
+        body.put("sender", current_user.getName());
+        Pusher push = new Pusher(room_users);
+        push.pushToAll("chat_notification", body);
         return Helper.getJsonFrame(0, "Nachricht erfolgreich gesendet", new JSONObject(), "send_message_response");
+    }
+
+    private JSONObject start_round(RoomList all_rooms, JSONObject data) {
+        int room_id = data.getInt("room_id");
+        Room room = all_rooms.getRoomByRoomId(room_id);
+        if (room == null) {
+            return Helper.getJsonFrame(1, "Raum nicht vorhanden", new JSONObject(), "start_round_response");
+        }
+        room.getGame().startRound();
+        return Helper.getJsonFrame(0, "Rundenstart erfolgreich angefragt", new JSONObject(), "start_round_response");
     }
 
     private JSONObject logout_user(User user, RoomList all_rooms, UserList connected_users) {
@@ -201,7 +219,6 @@ public class PokerInterface {
 
     private JSONObject register_user(JSONObject data) throws SQLException {
         if (data.has("name") && data.has("password")) {
-            //TODO hier noch überprüfen ob schon jemand vorhanden ist
             ResultSet rs = con.getUserByName(data.getString("name"));
             if (!rs.next()) {
                 con.insertUser(data.getString("name"), data.getString("password"));

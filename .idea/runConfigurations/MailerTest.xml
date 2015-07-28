@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ServerTest" type="JUnit" factoryName="JUnit" singleton="true" nameIsGenerated="true">
+  <configuration default="false" name="MailerTest" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
       <pattern>
         <option name="PATTERN" value="tests.*" />
@@ -10,7 +10,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
     <option name="ALTERNATIVE_JRE_PATH" value="" />
     <option name="PACKAGE_NAME" value="tests" />
-    <option name="MAIN_CLASS_NAME" value="tests.ServerTest" />
+    <option name="MAIN_CLASS_NAME" value="tests.MailerTest" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
     <option name="VM_PARAMETERS" value="-ea" />

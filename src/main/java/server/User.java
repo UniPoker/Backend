@@ -20,12 +20,14 @@ public class User {
     /**
      * ONLY FOR TESTS
      */
-    public User(){}
+    public User() {
+    }
 
     /**
      * Constructor
+     *
      * @param websession Session of connected server.User
-     * @param name Name of connected server.User
+     * @param name       Name of connected server.User
      */
     User(Session websession, String name, String password) {
         hand_cards = new Card[2];
@@ -68,14 +70,14 @@ public class User {
     }
 
     public void setHandCards(Card hand_card) {
-        if(hand_cards[0].equals(null)){
+        if (hand_cards[0] == null) {
             hand_cards[0] = hand_card;
-        }else if(hand_cards[1].equals(null)){
+        } else if (hand_cards[1] == null) {
             hand_cards[1] = hand_card;
         }
     }
 
-    public void resetHandCards(){
+    public void resetHandCards() {
         hand_cards = new Card[2];
     }
 

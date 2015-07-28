@@ -6,7 +6,7 @@ package server;
 public class Room {
 
     private final int MAX_PLAYER = 8;
-
+    private Game game;
     private UserList all_users;
 
 
@@ -17,9 +17,10 @@ public class Room {
      * @param id
      */
     public Room(User user, int id) {
-        all_users = new UserList(user);
+        all_users = new UserList();
         this.id = id;
-        user.setRoomId(this.id);
+        game = new Game(all_users);
+        joinRoom(user);
     }
 
     /**
@@ -30,6 +31,7 @@ public class Room {
         if ((all_users.length < MAX_PLAYER) && !(all_users.contains(user))) {
             all_users.add(user);
             user.setRoomId(this.id);
+            game.joinGame(user);
             return true;
         }
         return false;
@@ -38,6 +40,7 @@ public class Room {
     public boolean leaveRoom(User user) {
         user.setRoomId(-1);
         all_users.removeUser(user);
+        game.leaveGame(user);
         return true;
     }
 
@@ -51,6 +54,10 @@ public class Room {
 
     public UserList getAllUsers() {
         return all_users;
+    }
+
+    public Game getGame(){
+        return game;
     }
 
 
