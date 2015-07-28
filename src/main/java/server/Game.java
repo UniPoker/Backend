@@ -1,5 +1,6 @@
 package server;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 public class Game {
 
     private Pusher pusher;
+    private Pusher active_pusher;//for all playing users in current round
 
     private CardStack card_stack;
     private Card[] board;
@@ -25,6 +27,8 @@ public class Game {
 
     private List<Integer> pod;
     private int blind_index = 0;
+    private final int SMALL_BLIND_VALUE = 5;
+    private final int BIG_BLIND_VALUE = 10;
 
     private boolean last_turn = false;
     private boolean is_running = false;
@@ -59,6 +63,7 @@ public class Game {
      * @param player the User to be removed
      */
     public void leaveGame(User player) {
+        //TODO WENN schon in active_players dann da auch raus
         pusher.removeUser(player);
         JSONObject body = new JSONObject();
         body.put("body", players.getInterfaceUserList());
@@ -138,7 +143,7 @@ public class Game {
      */
     public void doCheck(User player) {
         if (isCurrent(player)) {
-            if (players.getUserByIndex(players.getUsers().indexOf(player) - 1).getLastAction() == Actions.CHECK || player.equals(first)) {
+            if (active_players.getUserByIndex(active_players.getUsers().indexOf(player) - 1).getLastAction() == Actions.CHECK || player.equals(first)) {
                 player.setLastAction(Actions.CHECK);
                 setNextUser(player);
             }
@@ -157,7 +162,7 @@ public class Game {
             User possible_winner = null;
             player.setHasFolded(true);
             player.setLastAction(Actions.FOLD);
-            for (User user : players.getUsers()) {
+            for (User user : active_players.getUsers()) {
                 if (!user.hasFolded()) {
                     i++;
                     possible_winner = user;
@@ -186,7 +191,7 @@ public class Game {
      * @return returns TRUE if he is the current player, FALSE otherwise
      */
     private boolean isCurrent(User player) {
-        return player.equals(current);
+        return player == current;
     }
 
     /**
@@ -207,19 +212,19 @@ public class Game {
      * @param current_player the current player who did the last action
      */
     private void setNextUser(User current_player) {
-        int index = (players.getUsers().indexOf(current_player) + 1) % players.length;
-        User person = players.getUserByIndex(index);
+        int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
+        User person = active_players.getUserByIndex(index);
         if (person.hasFolded()) {
             setNextUser(person);
         }
         current = person;
-        if (current.equals(first)) {
+        if (current == first) {
             if (last_turn) {
                 is_running = false;
                 //Karten verwerten + Sieger ermitteln
             } else {
                 dealBoardCards();
-                first = players.getUserByIndex(players.getUsers().indexOf(big_blind) + 1);
+                first = active_players.getUserByIndex(active_players.getUsers().indexOf(big_blind) + 1);
             }
         }
     }
@@ -228,8 +233,14 @@ public class Game {
      * sets the small and the big blind of this round
      */
     private void setBlindPlayers() {
-        small_blind = players.getUserByIndex(blind_index);
-        big_blind = players.getUserByIndex(raiseBlindIndex());
+        small_blind = active_players.getUserByIndex(blind_index);
+        if(small_blind.payMoney(SMALL_BLIND_VALUE)){
+            pod.add(SMALL_BLIND_VALUE);
+        }
+        big_blind = active_players.getUserByIndex(raiseBlindIndex());
+        if(big_blind.payMoney(BIG_BLIND_VALUE)){
+            pod.add(BIG_BLIND_VALUE);
+        }
     }
 
     /**
@@ -238,7 +249,8 @@ public class Game {
      * sets the player who does his first action
      */
     private void initRound() {
-        active_players = players;
+        active_players = new UserList(players.getUsers());
+        active_pusher = new Pusher(active_players);
         pod = new ArrayList<>();
         pod.add(0);
         board = new Card[5];
@@ -248,15 +260,25 @@ public class Game {
         setNextUser(big_blind);
         first = current;
         is_running = true;
-        JSONObject body = new JSONObject();
-        pusher.pushToAll("round_starts_notification", body);
+        for (User user : active_players.getUsers()) {
+            JSONArray arr = new JSONArray();
+            for (Card card : user.getHandCards()) {
+                arr.put(card.getInterfaceHash());
+            }
+            JSONObject body = new JSONObject();
+            body.put("cards", arr);
+            body.put("your_turn", isCurrent(user));
+            body.put("pod", getPodValue());
+            body.put("your_money", user.getLimit());
+            active_pusher.pushToSingle("round_starts_notification", body, user.getWebsession());
+        }
     }
 
     /**
      * gives every player two cards from the CardStack
      */
     private void dealCards() {
-        for (User player : players.getUsers()) {
+        for (User player : active_players.getUsers()) {
             for (int i = 0; i < 2; i++) {
                 player.setHandCards(card_stack.pop());
             }
@@ -286,6 +308,7 @@ public class Game {
 
     /**
      * returns the value of the pod
+     *
      * @return returns the value of the pod (Integer)
      */
     private int getPodValue() {
@@ -293,9 +316,9 @@ public class Game {
         return sum;
     }
 
-    private int raiseBlindIndex(){
+    private int raiseBlindIndex() {
 //        int _index = blind_index;
-        blind_index = ++blind_index % players.length;
+        blind_index = ++blind_index % active_players.length;
         return blind_index;
     }
 }

@@ -37,6 +37,11 @@ public class UserList {
         length += users.length;
     }
 
+    public UserList(List<User> users){
+        this.users = users;
+        length = users.size();
+    }
+
     /**
      * @param user user to add to server.UserList
      */

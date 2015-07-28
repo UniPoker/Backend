@@ -41,6 +41,15 @@ public class User {
         this.websession = session;
     }
 
+    public boolean payMoney(int amount) {
+        if (limit >= amount) {
+            limit -= amount;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public Session getWebsession() {
         return websession;
     }

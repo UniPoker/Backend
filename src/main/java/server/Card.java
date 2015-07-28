@@ -1,5 +1,7 @@
 package server;
 
+import java.util.HashMap;
+
 /**
  * Created by loster on 20.05.2015.
  */
@@ -35,5 +37,12 @@ public class Card {
      */
     public String getSymbol() {
         return symbol;
+    }
+
+    public HashMap<String, String> getInterfaceHash() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("value", Integer.toString(value));
+        map.put("symbol", symbol);
+        return map;
     }
 }

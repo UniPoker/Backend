@@ -31,15 +31,24 @@ public class Pusher {
         }
     }
 
-    public void removeUser(User user){
+    public void pushToSingle(String event, JSONObject body, Session session) {
+        try {
+            JSONObject json = Helper.getJsonFrame(0, "Nachricht erhalten", body, event);
+            session.getBasicRemote().sendText(json.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeUser(User user) {
         sessions.removeIf((p -> p == user.getWebsession()));
     }
 
-    public void addUser(User user){
+    public void addUser(User user) {
         sessions.add(user.getWebsession());
     }
 
-    public void addUser(UserList users){
+    public void addUser(UserList users) {
         sessions.addAll(users.getUsers().stream().map(User::getWebsession).collect(Collectors.toList()));
     }
 
