@@ -114,6 +114,7 @@ public class Game {
         if (isCurrent(player)) {
             pod.add(bet);
             lastActions.add(Actions.BET);
+            first = player;
             setNextUser(player);
         }
     }
@@ -146,6 +147,7 @@ public class Game {
     public void doCheck(User player) {
         if (isCurrent(player)) {
             if (lastActionEquals(Actions.CHECK) || player == first) {
+                first = player;
                 lastActions.add(Actions.CHECK);
                 setNextUser(player);
             }
@@ -272,6 +274,7 @@ public class Game {
             body.put("pod", getPodValue());
             body.put("your_money", user.getLimit());
             body.put("available_methods", getAvailableMethods(user));
+            body.put("all_users", active_players.getInterfaceUserList());
             active_pusher.pushToSingle("round_starts_notification", body, user.getWebsession());
         }
     }
