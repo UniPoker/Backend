@@ -100,4 +100,12 @@ public class User {
     public String getPassword() {
         return password;
     }
+
+    public int getAlready_paid() {
+        return already_paid;
+    }
+
+    public void setAlready_paid(int already_paid) {
+        this.already_paid = already_paid;
+    }
 }

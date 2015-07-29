@@ -50,7 +50,7 @@ public class PokerInterface {
             case "register_user":
                 return register_user(data);
             case "start_round":
-                return start_round(all_rooms, data);
+                return start_round(all_rooms, data, current_user);
             case "do_bet":
                 return do_bet(all_rooms, data);
             case "do_check":
@@ -221,13 +221,13 @@ public class PokerInterface {
         return Helper.getJsonFrame(0, "Nachricht erfolgreich gesendet", new JSONObject(), "send_message_response");
     }
 
-    private JSONObject start_round(RoomList all_rooms, JSONObject data) {
+    private JSONObject start_round(RoomList all_rooms, JSONObject data, User current_user) {
         int room_id = data.getInt("room_id");
         Room room = all_rooms.getRoomByRoomId(room_id);
         if (room == null) {
             return Helper.getJsonFrame(1, "Raum nicht vorhanden", new JSONObject(), "start_round_response");
         }
-        room.getGame().startRound();
+        room.getGame().startRound(current_user);
         return Helper.getJsonFrame(0, "Rundenstart erfolgreich angefragt", new JSONObject(), "start_round_response");
     }
 

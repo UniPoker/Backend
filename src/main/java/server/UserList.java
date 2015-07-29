@@ -143,7 +143,7 @@ public class UserList {
         JSONArray arr = new JSONArray();
         for (User user : users) {
             HashMap<String, String> map = new HashMap<>();
-            map.put("user_name", user.getName());
+            map.put("username", user.getName());
             arr.put(map);
         }
         return arr;
@@ -172,5 +172,16 @@ public class UserList {
         for(User user : users){
             user.resetHandCards();
         }
+    }
+
+    public boolean allUsersPaidSame() {
+        boolean paid_same = true;
+        int first_payment = users.get(0).getAlready_paid();
+        for(User user: users){
+            if(first_payment != user.getAlready_paid()){
+                paid_same = false;
+            }
+        }
+        return paid_same;
     }
 }

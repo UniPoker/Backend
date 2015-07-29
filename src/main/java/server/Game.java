@@ -27,7 +27,7 @@ public class Game {
     private User first;
 
     private List<String> lastActions;
-    private List<Integer> pod;
+    private List<Integer> pod = new ArrayList<>();
     private int blind_index = 0;
     private final int SMALL_BLIND_VALUE = 5;
     private final int BIG_BLIND_VALUE = 10;
@@ -52,11 +52,8 @@ public class Game {
      * @param player the joining User
      */
     public void joinGame(User player) {
-        JSONObject body = new JSONObject();
-        body.put("body", players.getInterfaceUserList());
-        pusher.pushToAll("user_joined_notification", body);
         pusher.addUser(player);
-//        startRound();
+        pushGameDataToUsers("user_joined_notification");
     }
 
     /**
@@ -65,21 +62,21 @@ public class Game {
      * @param player the User to be removed
      */
     public void leaveGame(User player) {
-        //TODO WENN schon in active_players dann da auch raus
         pusher.removeUser(player);
-        JSONObject body = new JSONObject();
-        body.put("body", players.getInterfaceUserList());
-        pusher.pushToAll("user_left_notification", body);
+        pushGameDataToUsers("user_left_notification");
     }
 
     /**
      * lets the Game start. Only possible if there are two or more Players
      */
-    public void startRound() {
+    public void startRound(User player) {
         //TODO sollte das vielleicht boolean sein um zu wissen ob es los geht oder nicht?
         //TODO das ganze bei den anderen Methoden auch  (doRaise...)
         if (players.length >= 2 && !is_running) {
             initRound();
+        }else{
+            JSONObject body = getJsonGameFrame(player);
+            pusher.pushToSingle("user_joined_notification",body,player.getWebsession());
         }
     }
 
@@ -179,7 +176,7 @@ public class Game {
      */
     private void noPlayersLeft(User possible_winner) {
         possible_winner.setLimit(possible_winner.getLimit() + getPodValue());
-        startRound();
+        startRound(possible_winner);
     }
 
     /**
@@ -213,7 +210,7 @@ public class Game {
         previous = current_player;
         int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
         current = active_players.getUserByIndex(index);
-        if (current == first) {
+        if (!lastActions.isEmpty() && active_players.allUsersPaidSame()) {
             if (last_turn) {
                 is_running = false;
                 //Karten verwerten + Sieger ermitteln
@@ -257,20 +254,31 @@ public class Game {
         first = current;
         previous = active_players.getPreviousUser(first);
         is_running = true;
-        for (User user : active_players.getUsers()) {
-            JSONArray arr = new JSONArray();
-            for (Card card : user.getHandCards()) {
+        pushGameDataToUsers("round_starts_notification");
+    }
+
+    private void pushGameDataToUsers(String event) {
+        for (User user : players.getUsers()) {
+            JSONObject body = getJsonGameFrame(user);
+            pusher.pushToSingle(event, body, user.getWebsession());
+        }
+    }
+
+    private JSONObject getJsonGameFrame(User user) {
+        JSONArray arr = new JSONArray();
+        for (Card card : user.getHandCards()) {
+            if (card != null) {
                 arr.put(card.getInterfaceHash());
             }
-            JSONObject body = new JSONObject();
-            body.put("cards", arr);
-            body.put("your_turn", isCurrent(user));
-            body.put("pod", getPodValue());
-            body.put("your_money", user.getLimit());
-            body.put("available_methods", getAvailableMethods(user));
-            body.put("all_users", active_players.getInterfaceUserList(small_blind,big_blind));
-            active_pusher.pushToSingle("round_starts_notification", body, user.getWebsession());
         }
+        JSONObject body = new JSONObject();
+        body.put("cards", arr);
+        body.put("your_turn", isCurrent(user));
+        body.put("pod", getPodValue());
+        body.put("your_money", user.getLimit());
+        body.put("available_methods", getAvailableMethods(user));
+        body.put("all_users", players.getInterfaceUserList(small_blind, big_blind));
+        return body;
     }
 
     //TODO möglicher Weise fehlerhaft!!!
@@ -335,9 +343,9 @@ public class Game {
     }
 
     private boolean lastActionEquals(String action) {
-        if(!lastActions.isEmpty()){
+        if (!lastActions.isEmpty()) {
             return lastActions.get(lastActions.size() - 1).equals(action);
-        }else{
+        } else {
             return false;
         }
     }
