@@ -114,7 +114,6 @@ public class Game {
         if (isCurrent(player)) {
             pod.add(bet);
             lastActions.add(Actions.BET);
-            first = player;
             setNextUser(player);
         }
     }
@@ -147,7 +146,6 @@ public class Game {
     public void doCheck(User player) {
         if (isCurrent(player)) {
             if (lastActionEquals(Actions.CHECK) || player == first) {
-                first = player;
                 lastActions.add(Actions.CHECK);
                 setNextUser(player);
             }
@@ -214,18 +212,13 @@ public class Game {
     private void setNextUser(User current_player) {
         previous = current_player;
         int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
-        User person = active_players.getUserByIndex(index);
-//        if (person.hasFolded()) {
-//            setNextUser(person);
-//        }
-        current = person;
+        current = active_players.getUserByIndex(index);
         if (current == first) {
             if (last_turn) {
                 is_running = false;
                 //Karten verwerten + Sieger ermitteln
             } else {
                 dealBoardCards();
-                first = active_players.getUserByIndex(active_players.getUsers().indexOf(big_blind) + 1);
             }
         }
     }
@@ -275,7 +268,7 @@ public class Game {
             body.put("pod", getPodValue());
             body.put("your_money", user.getLimit());
             body.put("available_methods", getAvailableMethods(user));
-            body.put("all_users", active_players.getInterfaceUserList());
+            body.put("all_users", active_players.getInterfaceUserList(small_blind,big_blind));
             active_pusher.pushToSingle("round_starts_notification", body, user.getWebsession());
         }
     }
@@ -284,11 +277,11 @@ public class Game {
     private JSONObject getAvailableMethods(User user) {
         JSONObject _available_methods = new JSONObject();
         if (isCurrent(user)) {
-            _available_methods.put(Actions.CHECK, lastActionEquals(Actions.CHECK) || user == first);
+            _available_methods.put(Actions.CHECK, (lastActionEquals(Actions.CHECK) || first == user) && board[3] != null);
             _available_methods.put(Actions.FOLD, true);
-            _available_methods.put(Actions.BET, first == user || lastActionEquals(Actions.CHECK) || lastActions.isEmpty());
-            _available_methods.put(Actions.CALL, lastActionEquals(Actions.BET) || lastActionEquals(Actions.RAISE));
-            _available_methods.put(Actions.RAISE, first != user || lastActionEquals(Actions.BET) || lastActionEquals(Actions.CHECK));
+            _available_methods.put(Actions.BET, first == user && board[3] != null);
+            _available_methods.put(Actions.CALL, lastActionEquals(Actions.BET) || lastActionEquals(Actions.RAISE) || first == user);
+            _available_methods.put(Actions.RAISE, first == user || lastActionEquals(Actions.BET) || lastActionEquals(Actions.CHECK));
         }
         return _available_methods;
     }

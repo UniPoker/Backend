@@ -13,7 +13,8 @@ public class User {
     private int room_id = -1;
     private Card[] hand_cards;
 
-    private double limit = 1000.00;
+    private int limit = 1000;
+    private int already_paid = 0;
 
     /**
      * ONLY FOR TESTS
@@ -88,11 +89,11 @@ public class User {
         hand_cards = new Card[2];
     }
 
-    public double getLimit() {
+    public int getLimit() {
         return limit;
     }
 
-    public void setLimit(double limit) {
+    public void setLimit(int limit) {
         this.limit = limit;
     }
 

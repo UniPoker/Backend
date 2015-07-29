@@ -67,23 +67,23 @@ public class PokerInterface {
     }
 
     private JSONObject do_bet(RoomList all_rooms, JSONObject data) {
-        return null;
+        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_bet_response");
     }
 
     private JSONObject do_call(RoomList all_rooms, JSONObject data) {
-        return null;
+        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_call_response");
     }
 
     private JSONObject do_check(RoomList all_rooms, JSONObject data) {
-        return null;
+        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_check_response");
     }
 
     private JSONObject do_raise(RoomList all_rooms, JSONObject data) {
-        return null;
+        return Helper.getJsonFrame(0, "unbekannter RequestType", new JSONObject(), "do_raise_response");
     }
 
     private JSONObject do_fold(RoomList all_rooms, JSONObject data) {
-        return null;
+        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_fold_response");
     }
 
     /**
