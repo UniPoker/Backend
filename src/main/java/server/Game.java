@@ -76,7 +76,7 @@ public class Game {
             initRound();
         }else{
             JSONObject body = getJsonGameFrame(player);
-            pusher.pushToSingle("user_joined_notification",body,player.getWebsession());
+            pusher.pushToSingle("user_joined_notification", body, player.getWebsession());
         }
     }
 
@@ -89,12 +89,17 @@ public class Game {
      * @param player the player who is doing the raise
      * @param raise  the amount of the raise
      */
-    public void doRaise(User player, int raise) {
+    public boolean doRaise(User player, int raise) {
         if (isCurrent(player)) {
-            pod.add(getLastBet() + raise);
-            first = player;
+            int value = active_players.getHighestBet() + raise;
+            value = value - player.getAlready_paid();
+            pod.add(value);
+            player.addAlready_paid(value);
             lastActions.add(Actions.RAISE);
             setNextUser(player);
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -107,11 +112,15 @@ public class Game {
      * @param player the player who is doing the bet
      * @param bet    the amount of the bet
      */
-    public void doBet(User player, int bet) {
+    public boolean doBet(User player, int bet) {
         if (isCurrent(player)) {
             pod.add(bet);
+            player.addAlready_paid(bet);
             lastActions.add(Actions.BET);
             setNextUser(player);
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -123,12 +132,16 @@ public class Game {
      *
      * @param player the player who is doing the call
      */
-    public void doCall(User player) {
+    public boolean doCall(User player) {
         if (isCurrent(player)) {
-            int bet = getLastBet();
+            int bet = active_players.getHighestBet() - player.getAlready_paid();
             pod.add(bet);
+            player.addAlready_paid(bet);
             lastActions.add(Actions.CALL);
             setNextUser(player);
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -140,13 +153,15 @@ public class Game {
      *
      * @param player the player who is doing the check
      */
-    public void doCheck(User player) {
+    public boolean doCheck(User player) {
         if (isCurrent(player)) {
-            if (lastActionEquals(Actions.CHECK) || player == first) {
+            if (lastActionEquals(Actions.CHECK) || (player == first && board[2] != null)) {
                 lastActions.add(Actions.CHECK);
                 setNextUser(player);
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -155,17 +170,20 @@ public class Game {
      *
      * @param player the player who is doing the fold
      */
-    public void doFold(User player) {
+    public boolean doFold(User player) {
         if (isCurrent(player)) {
             int i = 0;
-            User possible_winner = null;
             lastActions.add(Actions.FOLD);
             active_players.removeUser(player);
             if (active_players.length == 1) {
-                possible_winner = active_players.getUserByIndex(0);
+                User possible_winner = active_players.getUserByIndex(0);
                 noPlayersLeft(possible_winner);
+                return true;
             }
             setNextUser(player);
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -210,7 +228,7 @@ public class Game {
         previous = current_player;
         int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
         current = active_players.getUserByIndex(index);
-        if (!lastActions.isEmpty() && active_players.allUsersPaidSame()) {
+        if (!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull()) {
             if (last_turn) {
                 is_running = false;
                 //Karten verwerten + Sieger ermitteln
@@ -285,9 +303,9 @@ public class Game {
     private JSONObject getAvailableMethods(User user) {
         JSONObject _available_methods = new JSONObject();
         if (isCurrent(user)) {
-            _available_methods.put(Actions.CHECK, (lastActionEquals(Actions.CHECK) || first == user) && board[3] != null);
+            _available_methods.put(Actions.CHECK, (lastActionEquals(Actions.CHECK) || first == user) && board[2] != null);
             _available_methods.put(Actions.FOLD, true);
-            _available_methods.put(Actions.BET, first == user && board[3] != null);
+            _available_methods.put(Actions.BET, first == user && board[2] != null);
             _available_methods.put(Actions.CALL, lastActionEquals(Actions.BET) || lastActionEquals(Actions.RAISE) || first == user);
             _available_methods.put(Actions.RAISE, first == user || lastActionEquals(Actions.BET) || lastActionEquals(Actions.CHECK));
         }

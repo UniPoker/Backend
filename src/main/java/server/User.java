@@ -8,13 +8,16 @@ import javax.websocket.Session;
 public class User {
 
     private Session websession;
+
     private String name;
     private String password;
-    private int room_id = -1;
-    private Card[] hand_cards;
+    private String last_action = "";
 
+    private int room_id = -1;
     private int limit = 1000;
     private int already_paid = 0;
+
+    private Card[] hand_cards;
 
     /**
      * ONLY FOR TESTS
@@ -105,7 +108,20 @@ public class User {
         return already_paid;
     }
 
-    public void setAlready_paid(int already_paid) {
-        this.already_paid = already_paid;
+    public void addAlready_paid(int already_paid) {
+        this.already_paid += already_paid;
     }
+
+    public void resetPayment(){
+        this.already_paid = 0;
+    }
+
+    public void setLast_action(String action){
+        last_action = action;
+    }
+
+    public String getLast_action(){
+        return last_action;
+    }
+
 }

@@ -184,4 +184,29 @@ public class UserList {
         }
         return paid_same;
     }
+
+    public int getHighestBet(){
+        int i = 0;
+        for(User user: users){
+            int value = user.getAlready_paid();
+            if(value> i){
+                i = value;
+            }
+        }return i;
+    }
+
+    public boolean allPlayersActionNotNull(){
+        for(User user: users){
+            if(user.getLast_action().equals("")){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void resetAllPlayersAction(){
+        for(User user: users){
+            user.setLast_action("");
+        }
+    }
 }

@@ -66,24 +66,61 @@ public class PokerInterface {
         }
     }
 
-    private JSONObject do_bet(RoomList all_rooms, JSONObject data) {
-        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_bet_response");
+    private JSONObject do_bet(RoomList all_rooms, JSONObject data, User user) {
+        int bet = data.getInt("bet");
+        Room room = all_rooms.getRoomByRoomId(user.getRoomId());
+        Game game = room.getGame();
+        boolean is_successfull = game.doBet(user, bet);
+        if(is_successfull){
+            return Helper.getJsonFrame(0, "Bet erfolgreich", new JSONObject(), "do_bet_response");
+        }else{
+            return Helper.getJsonFrame(1, "Bet nicht erfolgreich", new JSONObject(), "do_bet_response");
+        }
     }
 
-    private JSONObject do_call(RoomList all_rooms, JSONObject data) {
-        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_call_response");
+    private JSONObject do_call(RoomList all_rooms, User user) {
+        Room room = all_rooms.getRoomByRoomId(user.getRoomId());
+        Game game = room.getGame();
+        boolean is_successfull = game.doCall(user);
+        if(is_successfull){
+            return Helper.getJsonFrame(0, "Call erfolgreich", new JSONObject(), "do_call_response");
+        }else{
+            return Helper.getJsonFrame(1, "Call nicht erfolgreich", new JSONObject(), "do_call_response");
+        }
     }
 
-    private JSONObject do_check(RoomList all_rooms, JSONObject data) {
-        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_check_response");
+    private JSONObject do_check(RoomList all_rooms, User user) {
+        Room room = all_rooms.getRoomByRoomId(user.getRoomId());
+        Game game = room.getGame();
+        boolean is_successfull = game.doCheck(user);
+        if(is_successfull){
+            return Helper.getJsonFrame(0, "Check erfolgreich", new JSONObject(), "do_check_response");
+        }else{
+            return Helper.getJsonFrame(1, "Check nicht erfolgreich", new JSONObject(), "do_check_response");
+        }
     }
 
-    private JSONObject do_raise(RoomList all_rooms, JSONObject data) {
-        return Helper.getJsonFrame(0, "unbekannter RequestType", new JSONObject(), "do_raise_response");
+    private JSONObject do_raise(RoomList all_rooms, JSONObject data, User user) {
+        int raise = data.getInt("raise");
+        Room room = all_rooms.getRoomByRoomId(user.getRoomId());
+        Game game = room.getGame();
+        boolean is_successfull = game.doRaise(user,raise);
+        if(is_successfull){
+            return Helper.getJsonFrame(0, "Raise erfolgreich", new JSONObject(), "do_raise_response");
+        }else{
+            return Helper.getJsonFrame(1, "Raise nicht erfolgreich", new JSONObject(), "do_raise_response");
+        }
     }
 
-    private JSONObject do_fold(RoomList all_rooms, JSONObject data) {
-        return Helper.getJsonFrame(0, "Irgendeine MESSAGE", new JSONObject(), "do_fold_response");
+    private JSONObject do_fold(RoomList all_rooms, User user) {
+        Room room = all_rooms.getRoomByRoomId(user.getRoomId());
+        Game game = room.getGame();
+        boolean is_successfull = game.doFold(user);
+        if(is_successfull){
+            return Helper.getJsonFrame(0, "Fold erfolgreich", new JSONObject(), "do_fold_response");
+        }else{
+            return Helper.getJsonFrame(1, "Fold nicht erfolgreich", new JSONObject(), "do_fold_response");
+        }
     }
 
     /**
