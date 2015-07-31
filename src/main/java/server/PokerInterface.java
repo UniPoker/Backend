@@ -52,15 +52,15 @@ public class PokerInterface {
             case "start_round":
                 return start_round(all_rooms, data, current_user);
             case "do_bet":
-                return do_bet(all_rooms, data);
+                return do_bet(all_rooms, data, current_user);
             case "do_check":
-                return do_check(all_rooms, data);
+                return do_check(all_rooms, current_user);
             case "do_call":
-                return do_call(all_rooms, data);
+                return do_call(all_rooms, current_user);
             case "do_fold":
-                return do_fold(all_rooms, data);
+                return do_fold(all_rooms, current_user);
             case "do_raise":
-                return do_raise(all_rooms, data);
+                return do_raise(all_rooms, data, current_user);
             default:
                 return Helper.getJsonFrame(99, "unbekannter RequestType", new JSONObject(), "error_response");
         }
