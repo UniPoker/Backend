@@ -15,7 +15,8 @@ public class Game {
     private Pusher active_pusher;//for all playing users in current round
 
     private CardStack card_stack;
-    private Card[] board;
+    private Card[] board = new Card[5];
+    ;
 
     private UserList players;
     private UserList active_players; //all players in current round
@@ -74,7 +75,7 @@ public class Game {
         //TODO das ganze bei den anderen Methoden auch  (doRaise...)
         if (players.length >= 2 && !is_running) {
             initRound();
-        }else{
+        } else {
             JSONObject body = getJsonGameFrame(player);
             pusher.pushToSingle("user_joined_notification", body, player.getWebsession());
         }
@@ -98,7 +99,7 @@ public class Game {
             setLastActions(Actions.RAISE, player);
             setNextUser(player);
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -119,7 +120,7 @@ public class Game {
             setLastActions(Actions.BET, player);
             setNextUser(player);
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -140,7 +141,7 @@ public class Game {
             setLastActions(Actions.CALL, player);
             setNextUser(player);
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -175,14 +176,9 @@ public class Game {
             int i = 0;
             setLastActions(Actions.FOLD, player);
             active_players.removeUser(player);
-            if (active_players.length == 1) {
-                User possible_winner = active_players.getUserByIndex(0);
-                noPlayersLeft(possible_winner);
-                return true;
-            }
             setNextUser(player);
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -233,17 +229,23 @@ public class Game {
         previous = current_player;
         int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
         current = active_players.getUserByIndex(index);
-        pushGameDataToUsers("action_notification");
-        if (!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull(big_blind)) {
-            if (last_turn) {
+        boolean no_players_left =  active_players.length == 1;
+        if ((!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull()) || no_players_left) {
+            if (last_turn || no_players_left) {
+                System.out.println("SPIEL IST ZUENDE GEWINNER MUSS NOCH ERMITTELT WERDEN!!!!");
                 is_running = false;
                 //Karten verwerten + Sieger ermitteln
             } else {
                 System.out.println("NEUE KARTEN WERDEN AUSGETEILT!!!!!!!!!!");
+                lastActions = new ArrayList<>();
+                active_players.resetAllPlayersAction();
+                current = small_blind;
                 dealBoardCards();
             }
         }
+        pushGameDataToUsers("action_notification");
     }
+
 
     /**
      * sets the small and the big blind of this round
@@ -251,10 +253,12 @@ public class Game {
     private void setBlindPlayers() {
         small_blind = active_players.getUserByIndex(blind_index);
         if (small_blind.payMoney(SMALL_BLIND_VALUE)) {
+            setLastActions(Actions.BET, small_blind);
             pod.add(SMALL_BLIND_VALUE);
         }
         big_blind = active_players.getUserByIndex(raiseBlindIndex());
         if (big_blind.payMoney(BIG_BLIND_VALUE)) {
+            setLastActions(Actions.RAISE, big_blind);
             pod.add(BIG_BLIND_VALUE);
         }
     }
@@ -310,13 +314,17 @@ public class Game {
     private JSONObject getAvailableMethods(User user) {
         JSONObject _available_methods = new JSONObject();
         if (isCurrent(user)) {
-            _available_methods.put(Actions.CHECK, (lastActionEquals(Actions.CHECK) || first == user) && board[2] != null);
+            _available_methods.put(Actions.CHECK, (lastActionEquals(Actions.CHECK) || (isFirstPlayer(user))) && board[2] != null);
             _available_methods.put(Actions.FOLD, true);
-            _available_methods.put(Actions.BET, first == user && board[2] != null);
-            _available_methods.put(Actions.CALL, lastActionEquals(Actions.BET) || lastActionEquals(Actions.RAISE) || first == user);
-            _available_methods.put(Actions.RAISE, first == user || lastActionEquals(Actions.BET) || lastActionEquals(Actions.CHECK));
+            _available_methods.put(Actions.BET, lastActionEquals(Actions.CHECK) || (isFirstPlayer(user)) && board[2] != null);
+            _available_methods.put(Actions.CALL, (lastActionEquals(Actions.BET) || lastActionEquals(Actions.RAISE)));
+            _available_methods.put(Actions.RAISE, lastActionEquals(Actions.RAISE) || lastActionEquals(Actions.BET) || lastActionEquals(Actions.CALL));
         }
         return _available_methods;
+    }
+
+    private boolean isFirstPlayer(User user) {
+        return first == user && first.getLast_action().equals("");
     }
 
     /**
@@ -343,9 +351,9 @@ public class Game {
             board[0] = card_stack.pop();
             board[1] = card_stack.pop();
             board[2] = card_stack.pop();
-        } else if (board[3].equals(null)) {
+        } else if (board[3] == (null)) {
             board[3] = card_stack.pop();
-        } else if (board[4].equals(null)) {
+        } else if (board[4] == null) {
             last_turn = true;
             board[4] = card_stack.pop();
         }
@@ -359,7 +367,7 @@ public class Game {
         }
         //bis hier!
         body.put("cards", arr);
-        active_pusher.pushToAll("board_cards_notification",body);
+        active_pusher.pushToAll("board_cards_notification", body);
     }
 
     /**

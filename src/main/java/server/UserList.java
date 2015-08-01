@@ -195,9 +195,9 @@ public class UserList {
         }return i;
     }
 
-    public boolean allPlayersActionNotNull(User big_blind){
+    public boolean allPlayersActionNotNull(){
         for(User user: users){
-            if(user.getLast_action().equals("") && user != big_blind  ){
+            if(user.getLast_action().equals("")){
                 return false;
             }
         }
