@@ -154,8 +154,8 @@ public class UserList {
         for (User user : users) {
             TypedMap map = new TypedMap();
             TypedMap.AbstractKey<String> username = TypedMap.StringKey.username;
-            TypedMap.AbstractKey<Boolean> is_big_blind = TypedMap.BooleanKey.is_small_blind;
-            TypedMap.AbstractKey<Boolean> is_small_blind = TypedMap.BooleanKey.is_big_blind;
+            TypedMap.AbstractKey<Boolean> is_big_blind = TypedMap.BooleanKey.is_big_blind;
+            TypedMap.AbstractKey<Boolean> is_small_blind = TypedMap.BooleanKey.is_small_blind;
             map.put(username, user.getName());
             map.put(is_big_blind, user == bigblind);
             map.put(is_small_blind, user == smallblind);
@@ -195,9 +195,9 @@ public class UserList {
         }return i;
     }
 
-    public boolean allPlayersActionNotNull(){
+    public boolean allPlayersActionNotNull(User big_blind){
         for(User user: users){
-            if(user.getLast_action().equals("")){
+            if(user.getLast_action().equals("") && user != big_blind  ){
                 return false;
             }
         }

@@ -46,6 +46,7 @@ public class User {
     public boolean payMoney(int amount) {
         if (limit >= amount) {
             limit -= amount;
+            already_paid += amount;
             return true;
         } else {
             return false;
@@ -110,6 +111,7 @@ public class User {
 
     public void addAlready_paid(int already_paid) {
         this.already_paid += already_paid;
+        this.limit -= already_paid;
     }
 
     public void resetPayment(){

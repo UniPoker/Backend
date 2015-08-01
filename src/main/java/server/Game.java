@@ -95,7 +95,7 @@ public class Game {
             value = value - player.getAlready_paid();
             pod.add(value);
             player.addAlready_paid(value);
-            lastActions.add(Actions.RAISE);
+            setLastActions(Actions.RAISE, player);
             setNextUser(player);
             return true;
         }else{
@@ -116,7 +116,7 @@ public class Game {
         if (isCurrent(player)) {
             pod.add(bet);
             player.addAlready_paid(bet);
-            lastActions.add(Actions.BET);
+            setLastActions(Actions.BET, player);
             setNextUser(player);
             return true;
         }else{
@@ -137,7 +137,7 @@ public class Game {
             int bet = active_players.getHighestBet() - player.getAlready_paid();
             pod.add(bet);
             player.addAlready_paid(bet);
-            lastActions.add(Actions.CALL);
+            setLastActions(Actions.CALL, player);
             setNextUser(player);
             return true;
         }else{
@@ -156,7 +156,7 @@ public class Game {
     public boolean doCheck(User player) {
         if (isCurrent(player)) {
             if (lastActionEquals(Actions.CHECK) || (player == first && board[2] != null)) {
-                lastActions.add(Actions.CHECK);
+                setLastActions(Actions.CHECK, player);
                 setNextUser(player);
                 return true;
             }
@@ -173,7 +173,7 @@ public class Game {
     public boolean doFold(User player) {
         if (isCurrent(player)) {
             int i = 0;
-            lastActions.add(Actions.FOLD);
+            setLastActions(Actions.FOLD, player);
             active_players.removeUser(player);
             if (active_players.length == 1) {
                 User possible_winner = active_players.getUserByIndex(0);
@@ -185,6 +185,11 @@ public class Game {
         }else{
             return false;
         }
+    }
+
+    private void setLastActions(String method, User player) {
+        lastActions.add(method);
+        player.setLast_action(method);
     }
 
     /**
@@ -228,11 +233,13 @@ public class Game {
         previous = current_player;
         int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
         current = active_players.getUserByIndex(index);
-        if (!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull()) {
+        pushGameDataToUsers("action_notification");
+        if (!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull(big_blind)) {
             if (last_turn) {
                 is_running = false;
                 //Karten verwerten + Sieger ermitteln
             } else {
+                System.out.println("NEUE KARTEN WERDEN AUSGETEILT!!!!!!!!!!");
                 dealBoardCards();
             }
         }
@@ -332,7 +339,7 @@ public class Game {
      */
     private void dealBoardCards() {
         card_stack.pop();//burn card;
-        if (board[0].equals(null)) {
+        if (board[0] == null) {
             board[0] = card_stack.pop();
             board[1] = card_stack.pop();
             board[2] = card_stack.pop();
@@ -342,6 +349,17 @@ public class Game {
             last_turn = true;
             board[4] = card_stack.pop();
         }
+        //TODO Kann in Funktion mit Array als Parameter ausgelagert werden
+        JSONObject body = new JSONObject();
+        JSONArray arr = new JSONArray();
+        for (Card card : board) {
+            if (card != null) {
+                arr.put(card.getInterfaceHash());
+            }
+        }
+        //bis hier!
+        body.put("cards", arr);
+        active_pusher.pushToAll("board_cards_notification",body);
     }
 
     /**
