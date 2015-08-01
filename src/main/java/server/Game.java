@@ -3,8 +3,8 @@ package server;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Created by loster on 26.05.2015.
@@ -234,6 +234,7 @@ public class Game {
             if (last_turn || no_players_left) {
                 System.out.println("SPIEL IST ZUENDE GEWINNER MUSS NOCH ERMITTELT WERDEN!!!!");
                 is_running = false;
+                User winner = getWinner();
                 //Karten verwerten + Sieger ermitteln
             } else {
                 System.out.println("NEUE KARTEN WERDEN AUSGETEILT!!!!!!!!!!");
@@ -246,6 +247,65 @@ public class Game {
         pushGameDataToUsers("action_notification");
     }
 
+    private User getWinner() {
+        User possible_winner;
+        for(User user: active_players.getUsers()){
+            Card [] _cards = Stream.concat(Arrays.stream(board), Arrays.stream(user.getHandCards())).toArray(Card[]::new);
+            ArrayList<Card> cards = new ArrayList<Card>(Arrays.asList(_cards));
+            Collections.sort(cards);
+            Collections.reverse(cards); //damit absteigend
+            int hand_value = getBestHand(cards);
+        }
+        return null;
+    }
+
+    private int getBestHand(ArrayList<Card> cards) {
+        if(hasRoyalFlush(cards)){
+            return 10;
+        }else if (hasStraightFlush(cards)){
+            return 10;
+        }
+        return 0;
+    }
+
+    public boolean hasRoyalFlush(ArrayList<Card> cards) {
+        int needed_value;
+        String highest_card_symbol;
+        for(int i = 0; i < 3; i++){
+            Card _card = cards.get(i);
+            needed_value = 14;
+            if(_card.getValue() == needed_value){
+                highest_card_symbol = _card.getSymbol();
+                for(int a = 0; a < 5; a++){
+                    if(containsCardByValue(cards,highest_card_symbol,needed_value)){
+                        needed_value--;
+                        if(a == 4){
+                            return true;
+                        }
+                    }else{
+                        break;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean hasStraightFlush(ArrayList<Card> cards) {
+        return false;
+    }
+
+    private boolean containsCardByValue(final List<Card> list, final String symbol, final int value){
+        return list.stream().filter(o -> o.getSymbol().equals(symbol) && o.getValue() == value).findFirst().isPresent();
+    }
+
+//    private boolean hasCard (int value, String color){
+//
+//    }
+//
+//    private boolean gotRoyalFlush(User user) {
+//        return false;
+//    }
 
     /**
      * sets the small and the big blind of this round

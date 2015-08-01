@@ -23,6 +23,7 @@ public class User {
      * ONLY FOR TESTS
      */
     public User() {
+        hand_cards = new Card[2];
     }
 
     /**

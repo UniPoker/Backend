@@ -1,11 +1,13 @@
 package server;
 
+import com.google.common.collect.ComparisonChain;
+
 import java.util.HashMap;
 
 /**
  * Created by loster on 20.05.2015.
  */
-public class Card {
+public class Card implements Comparable<Card>{
 
     private int value;
     private String symbol;
@@ -44,5 +46,14 @@ public class Card {
         map.put("value", Integer.toString(value));
         map.put("symbol", symbol);
         return map;
+    }
+
+
+    @Override
+    public int compareTo(Card card) {
+        return ComparisonChain.start()
+                .compare(value, card.value)
+//                .compare(symbol, card.symbol)
+                .result();
     }
 }

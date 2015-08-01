@@ -7,7 +7,7 @@ import java.util.*;
  */
 public class CardStack {
     private final String[] POSSIBLE_SYMBOLS = {"hearts", "spades", "clubs", "diamonds"};
-    private final int[] POSSIBLE_VALUES = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    private final int[] POSSIBLE_VALUES = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 
     private Stack<Card> cards;
 
