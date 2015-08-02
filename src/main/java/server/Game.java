@@ -95,6 +95,9 @@ public class Game {
             player.addAlready_paid(value);
             setLastActions(Constants.Actions.RAISE, player);
             setNextUser(player);
+            JSONObject body = new JSONObject();
+            body.put("message",  player.getName()+" hat um" + raise + "erhöht");
+            pusher.pushToAll("action_performed_notification", body);
             return true;
         } else {
             return false;
@@ -116,6 +119,9 @@ public class Game {
             player.addAlready_paid(bet);
             setLastActions(Constants.Actions.BET, player);
             setNextUser(player);
+            JSONObject body = new JSONObject();
+            body.put("message", player.getName()+" hat"+bet+"gesetzt");
+            pusher.pushToAll("action_performed_notification",body);
             return true;
         } else {
             return false;
@@ -137,6 +143,9 @@ public class Game {
             player.addAlready_paid(bet);
             setLastActions(Constants.Actions.CALL, player);
             setNextUser(player);
+            JSONObject body = new JSONObject();
+            body.put("message", player.getName()+" hat gecalled");
+            pusher.pushToAll("action_performed_notification", body);
             return true;
         } else {
             return false;
@@ -156,6 +165,9 @@ public class Game {
             if (lastActionEquals(Constants.Actions.CHECK) || (player == first && board[2] != null)) {
                 setLastActions(Constants.Actions.CHECK, player);
                 setNextUser(player);
+                JSONObject body = new JSONObject();
+                body.put("message", player.getName() + " hat gechecked");
+                pusher.pushToAll("action_performed_notification", body);
                 return true;
             }
         }
@@ -174,6 +186,9 @@ public class Game {
             setLastActions(Constants.Actions.FOLD, player);
             active_players.removeUser(player);
             setNextUser(player);
+            JSONObject body = new JSONObject();
+            body.put("message", player.getName() + " hat gefolded");
+            pusher.pushToAll("action_performed_notification", body);
             return true;
         } else {
             return false;
