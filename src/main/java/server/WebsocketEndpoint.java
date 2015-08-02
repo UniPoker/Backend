@@ -2,6 +2,7 @@ package server;
 
 //import javax.websocket.ClientEndpoint;
 
+import javax.mail.MessagingException;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
@@ -70,7 +71,7 @@ public class WebsocketEndpoint {
     }
 
     @OnClose
-    public void onWebSocketClose(CloseReason reason, Session session) throws NotLoggedInException, SQLException {
+    public void onWebSocketClose(CloseReason reason, Session session) throws NotLoggedInException, SQLException, MessagingException {
         pokerInterface.receive("logout_user", new JSONObject(), connected_users.getUserBySession(session), connected_users, all_rooms);
     }
 
