@@ -123,5 +123,4 @@ public class User {
     public String getLast_action(){
         return last_action;
     }
-
 }

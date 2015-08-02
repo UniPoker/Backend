@@ -1,5 +1,6 @@
 package server;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Helper {
@@ -20,4 +21,11 @@ public class Helper {
         return frame;
     }
 
+    public static JSONObject getWinnerJSON(User user, Card[] cards, int value) {
+        JSONObject obj = new JSONObject();
+        obj.put("value", value);
+        obj.put("user", user);
+        obj.put("cards", cards);
+        return obj;
+    }
 }

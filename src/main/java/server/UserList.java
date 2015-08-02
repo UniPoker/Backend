@@ -170,6 +170,12 @@ public class UserList {
         }
     }
 
+    public void resetAlreadyPaid(){
+        for(User user : users){
+            user.resetPayment();
+        }
+    }
+
     public boolean allUsersPaidSame() {
         boolean paid_same = true;
         int first_payment = users.get(0).getAlready_paid();
