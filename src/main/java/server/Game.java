@@ -96,7 +96,8 @@ public class Game {
             setLastActions(Constants.Actions.RAISE, player);
             setNextUser(player);
             JSONObject body = new JSONObject();
-            body.put("message",  player.getName()+" hat um" + raise + "erhöht");
+            body.put("message", "hat um" + raise + "erhöht");
+            body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
             return true;
         } else {
@@ -120,7 +121,8 @@ public class Game {
             setLastActions(Constants.Actions.BET, player);
             setNextUser(player);
             JSONObject body = new JSONObject();
-            body.put("message", player.getName()+" hat"+bet+"gesetzt");
+            body.put("message", "hat"+bet+"gesetzt");
+            body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification",body);
             return true;
         } else {
@@ -144,7 +146,8 @@ public class Game {
             setLastActions(Constants.Actions.CALL, player);
             setNextUser(player);
             JSONObject body = new JSONObject();
-            body.put("message", player.getName()+" hat gecalled");
+            body.put("message", "hat gecalled");
+            body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
             return true;
         } else {
@@ -166,7 +169,8 @@ public class Game {
                 setLastActions(Constants.Actions.CHECK, player);
                 setNextUser(player);
                 JSONObject body = new JSONObject();
-                body.put("message", player.getName() + " hat gechecked");
+                body.put("message", "hat gechecked");
+                body.put("sender", player.getName());
                 pusher.pushToAll("action_performed_notification", body);
                 return true;
             }
@@ -187,7 +191,8 @@ public class Game {
             active_players.removeUser(player);
             setNextUser(player);
             JSONObject body = new JSONObject();
-            body.put("message", player.getName() + " hat gefolded");
+            body.put("message","hat gefolded");
+            body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
             return true;
         } else {

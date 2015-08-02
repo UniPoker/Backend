@@ -27,7 +27,7 @@ public class PokerInterface {
      * @throws NotLoggedInException is thrown if the current_user ist not logged in and is not calling a method where is doesn't need to log in
      * @throws SQLException         is thrown if there are any SQL Errors
      */
-    public JSONObject receive(String event, JSONObject data, User current_user, UserList connected_users, RoomList all_rooms) throws NotLoggedInException, SQLException {
+    public JSONObject receive(String event, JSONObject data, User current_user, UserList connected_users, RoomList all_rooms) throws NotLoggedInException, SQLException, MessagingException {
         if (!Arrays.asList(do_not_authorize).contains(event)) {
             isLoggedIn(connected_users, current_user);
         }
@@ -70,9 +70,9 @@ public class PokerInterface {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
         boolean is_successfull = game.doBet(user, bet);
-        if(is_successfull){
+        if (is_successfull) {
             return Helper.getJsonFrame(0, "Bet erfolgreich", new JSONObject(), "do_bet_response");
-        }else{
+        } else {
             return Helper.getJsonFrame(1, "Bet nicht erfolgreich", new JSONObject(), "do_bet_response");
         }
     }
@@ -81,9 +81,9 @@ public class PokerInterface {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
         boolean is_successfull = game.doCall(user);
-        if(is_successfull){
+        if (is_successfull) {
             return Helper.getJsonFrame(0, "Call erfolgreich", new JSONObject(), "do_call_response");
-        }else{
+        } else {
             return Helper.getJsonFrame(1, "Call nicht erfolgreich", new JSONObject(), "do_call_response");
         }
     }
@@ -92,9 +92,9 @@ public class PokerInterface {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
         boolean is_successfull = game.doCheck(user);
-        if(is_successfull){
+        if (is_successfull) {
             return Helper.getJsonFrame(0, "Check erfolgreich", new JSONObject(), "do_check_response");
-        }else{
+        } else {
             return Helper.getJsonFrame(1, "Check nicht erfolgreich", new JSONObject(), "do_check_response");
         }
     }
@@ -103,10 +103,10 @@ public class PokerInterface {
         int raise = data.getInt("raise");
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
-        boolean is_successfull = game.doRaise(user,raise);
-        if(is_successfull){
+        boolean is_successfull = game.doRaise(user, raise);
+        if (is_successfull) {
             return Helper.getJsonFrame(0, "Raise erfolgreich", new JSONObject(), "do_raise_response");
-        }else{
+        } else {
             return Helper.getJsonFrame(1, "Raise nicht erfolgreich", new JSONObject(), "do_raise_response");
         }
     }
@@ -115,9 +115,9 @@ public class PokerInterface {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
         boolean is_successfull = game.doFold(user);
-        if(is_successfull){
+        if (is_successfull) {
             return Helper.getJsonFrame(0, "Fold erfolgreich", new JSONObject(), "do_fold_response");
-        }else{
+        } else {
             return Helper.getJsonFrame(1, "Fold nicht erfolgreich", new JSONObject(), "do_fold_response");
         }
     }
@@ -284,16 +284,15 @@ public class PokerInterface {
     }
 
     private JSONObject register_user(JSONObject data) throws SQLException, MessagingException {
-            ResultSet rs = con.getUserByName(data.getString("name"));
-            if (!rs.next()) {
-                String name = data.getString("name");
-                String password = data.getString("password");
-                con.insertUser(name, password);
-                mailer.sendRegistrationMail(data.getString("email"), "Registrierung", name, password);
-                return Helper.getJsonFrame(0, "Registrierung erfolgreich.", new JSONObject(), "register_user_response");
-            } else {
-                return Helper.getJsonFrame(1, "Nutzername schon verwendet.", new JSONObject(), "register_user_response");
-            }
+        ResultSet rs = con.getUserByName(data.getString("name"));
+        if (!rs.next()) {
+            String name = data.getString("name");
+            String password = data.getString("password");
+            con.insertUser(name, password);
+            mailer.sendRegistrationMail(data.getString("email"), "Registrierung", name, password);
+            return Helper.getJsonFrame(0, "Registrierung erfolgreich.", new JSONObject(), "register_user_response");
+        } else {
+            return Helper.getJsonFrame(1, "Nutzername schon verwendet.", new JSONObject(), "register_user_response");
         }
     }
 }
