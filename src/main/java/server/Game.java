@@ -229,7 +229,7 @@ public class Game {
         previous = current_player;
         int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
         current = active_players.getUserByIndex(index);
-        boolean no_players_left =  active_players.length == 1;
+        boolean no_players_left = active_players.length == 1;
         if ((!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull()) || no_players_left) {
             if (last_turn || no_players_left) {
                 System.out.println("SPIEL IST ZUENDE GEWINNER MUSS NOCH ERMITTELT WERDEN!!!!");
@@ -248,22 +248,27 @@ public class Game {
     }
 
     private User getWinner() {
-        User possible_winner;
-        for(User user: active_players.getUsers()){
-            Card [] _cards = Stream.concat(Arrays.stream(board), Arrays.stream(user.getHandCards())).toArray(Card[]::new);
+        User possible_winner = null;
+        int highest_value = 0;
+        for (User user : active_players.getUsers()) {
+            Card[] _cards = Stream.concat(Arrays.stream(board), Arrays.stream(user.getHandCards())).toArray(Card[]::new);
             ArrayList<Card> cards = new ArrayList<Card>(Arrays.asList(_cards));
             Collections.sort(cards);
             Collections.reverse(cards); //damit absteigend
             int hand_value = getBestHand(cards);
+            if (hand_value > highest_value) {
+                highest_value = hand_value;
+                possible_winner = user;
+            }
         }
-        return null;
+        return possible_winner;
     }
 
     private int getBestHand(ArrayList<Card> cards) {
-        if(hasRoyalFlush(cards)){
-            return 10;
-        }else if (hasStraightFlush(cards)){
-            return 10;
+        if (hasRoyalFlush(cards)) {
+            return HandValues.ROYAL_FLUSH;
+        } else if (hasStraightFlush(cards)) {
+            return HandValues.STRAIGHT_FLUSH;
         }
         return 0;
     }
@@ -271,18 +276,18 @@ public class Game {
     public boolean hasRoyalFlush(ArrayList<Card> cards) {
         int needed_value;
         String highest_card_symbol;
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             Card _card = cards.get(i);
             needed_value = 14;
-            if(_card.getValue() == needed_value){
+            if (_card.getValue() == needed_value) {
                 highest_card_symbol = _card.getSymbol();
-                for(int a = 0; a < 5; a++){
-                    if(containsCardByValue(cards,highest_card_symbol,needed_value)){
+                for (int a = 0; a < 5; a++) {
+                    if (containsCardByValueAndSymbol(cards, highest_card_symbol, needed_value)) {
                         needed_value--;
-                        if(a == 4){
+                        if (a == 4) {
                             return true;
                         }
-                    }else{
+                    } else {
                         break;
                     }
                 }
@@ -292,11 +297,83 @@ public class Game {
     }
 
     public boolean hasStraightFlush(ArrayList<Card> cards) {
+        int needed_value;
+        String highest_card_symbol;
+        for (int i = 0; i < 3; i++) {
+            Card _card = cards.get(i);
+            needed_value = _card.getValue();
+            highest_card_symbol = _card.getSymbol();
+            for (int a = 0; a < 5; a++) {
+                if (containsCardByValueAndSymbol(cards, highest_card_symbol, needed_value)) {
+                    needed_value--;
+                    if (a == 4) {
+                        return true;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
         return false;
     }
 
-    private boolean containsCardByValue(final List<Card> list, final String symbol, final int value){
+    public boolean hasQuads(ArrayList<Card> cards){
+        return false;
+    }
+
+    public boolean hasFlush(ArrayList<Card> cards){
+        
+    }
+
+    public boolean hasFullHouse(ArrayList<Card> cards){
+        return false;
+    }
+
+    public boolean hasStraight(ArrayList<Card> cards){
+        int needed_value;
+        for (int i = 0; i < 3; i++) {
+            Card _card = cards.get(i);
+            needed_value = _card.getValue();
+            for (int a = 0; a < 5; a++) {
+                if (containsCardByValue(cards, needed_value)) {
+                    needed_value--;
+                    if (a == 4) {
+                        return true;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean hasTrips(ArrayList<Card> cards){
+        return false;
+    }
+
+    public boolean hasTwoPair(ArrayList<Card> cards){
+        return false;
+    }
+
+    public boolean hasPair (ArrayList<Card> cards){
+        return false;
+    }
+
+    public boolean hasHighCard(ArrayList<Card> cards){
+        if(containsCardByValue(cards, 14)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private boolean containsCardByValueAndSymbol(List<Card> list, String symbol, int value) {
         return list.stream().filter(o -> o.getSymbol().equals(symbol) && o.getValue() == value).findFirst().isPresent();
+    }
+
+    private boolean containsCardByValue(List<Card> list, int value) {
+        return list.stream().filter(o -> o.getValue() == value).findFirst().isPresent();
     }
 
 //    private boolean hasCard (int value, String color){

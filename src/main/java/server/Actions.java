@@ -5,10 +5,12 @@ package server;
  */
 public final class Actions {
 
-    public static String RAISE = "raise";
-    public static String FOLD = "fold";
-    public static String CHECK = "check";
-    public static String CALL = "call";
-    public static String BET = "bet";
+    private Actions(){} //
+
+    public static final String RAISE = "raise";
+    public static final String FOLD = "fold";
+    public static final String CHECK = "check";
+    public static final String CALL = "call";
+    public static final String BET = "bet";
 
 }
