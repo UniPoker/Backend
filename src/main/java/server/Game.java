@@ -594,9 +594,9 @@ public class Game {
     private JSONObject getAvailableMethods(User user) {
         JSONObject _available_methods = new JSONObject();
         if (isCurrent(user)) {
-            _available_methods.put(Constants.Actions.CHECK, (lastActionEquals(Constants.Actions.CHECK) || (isFirstPlayer(user))) && board[2] != null);
+            _available_methods.put(Constants.Actions.CHECK, (lastActionEquals(Constants.Actions.CHECK) || (lastActions.isEmpty())));
             _available_methods.put(Constants.Actions.FOLD, true);
-            _available_methods.put(Constants.Actions.BET, lastActionEquals(Constants.Actions.CHECK) || (isFirstPlayer(user)) && board[2] != null);
+            _available_methods.put(Constants.Actions.BET, lastActionEquals(Constants.Actions.CHECK) || (lastActions.isEmpty());
             _available_methods.put(Constants.Actions.CALL, (lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.RAISE)));
             _available_methods.put(Constants.Actions.RAISE, lastActionEquals(Constants.Actions.RAISE) || lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.CALL));
         }
