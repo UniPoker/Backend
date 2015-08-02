@@ -596,8 +596,8 @@ public class Game {
         if (isCurrent(user)) {
             _available_methods.put(Constants.Actions.CHECK, (lastActionEquals(Constants.Actions.CHECK) || (lastActions.isEmpty())));
             _available_methods.put(Constants.Actions.FOLD, true);
-            _available_methods.put(Constants.Actions.BET, lastActionEquals(Constants.Actions.CHECK) || (lastActions.isEmpty());
-            _available_methods.put(Constants.Actions.CALL, (lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.RAISE)));
+            _available_methods.put(Constants.Actions.BET, lastActionEquals(Constants.Actions.CHECK) || (lastActions.isEmpty()));
+            _available_methods.put(Constants.Actions.CALL, (lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.CALL) ||lastActionEquals(Constants.Actions.RAISE)));
             _available_methods.put(Constants.Actions.RAISE, lastActionEquals(Constants.Actions.RAISE) || lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.CALL));
         }
         return _available_methods;
