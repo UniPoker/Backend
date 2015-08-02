@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.mail.MessagingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ public class PokerInterface {
 
     private String[] do_not_authorize = new String[]{"login_user", "register_user"};
     private DatabaseConnection con = DatabaseConnection.getInstance();
+    private Mailer mailer = Mailer.getInstance();
 
     /**
      * the entry point of the PokerInterface. Is called by the WebsocketEndpoint and gets all the given information to fire the right event
@@ -281,17 +283,17 @@ public class PokerInterface {
         connected_users.removeUser(user);
     }
 
-    private JSONObject register_user(JSONObject data) throws SQLException {
-        if (data.has("name") && data.has("password")) {
+    private JSONObject register_user(JSONObject data) throws SQLException, MessagingException {
             ResultSet rs = con.getUserByName(data.getString("name"));
             if (!rs.next()) {
-                con.insertUser(data.getString("name"), data.getString("password"));
+                String name = data.getString("name");
+                String password = data.getString("password");
+                con.insertUser(name, password);
+                mailer.sendRegistrationMail(data.getString("email"), "Registrierung", name, password);
                 return Helper.getJsonFrame(0, "Registrierung erfolgreich.", new JSONObject(), "register_user_response");
             } else {
                 return Helper.getJsonFrame(1, "Nutzername schon verwendet.", new JSONObject(), "register_user_response");
             }
-        } else {
-            throw new JSONException("Invalid JSON");
         }
     }
 }
