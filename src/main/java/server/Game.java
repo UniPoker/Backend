@@ -166,15 +166,13 @@ public class Game {
      */
     public boolean doCheck(User player) {
         if (isCurrent(player)) {
-            if (lastActionEquals(Constants.Actions.CHECK) || (player == first && board[2] != null)) {
-                setLastActions(Constants.Actions.CHECK, player);
-                JSONObject body = new JSONObject();
-                body.put("message", "hat gechecked");
-                body.put("sender", player.getName());
-                pusher.pushToAll("action_performed_notification", body);
-                setNextUser(player);
-                return true;
-            }
+            setLastActions(Constants.Actions.CHECK, player);
+            JSONObject body = new JSONObject();
+            body.put("message", "hat gechecked");
+            body.put("sender", player.getName());
+            pusher.pushToAll("action_performed_notification", body);
+            setNextUser(player);
+            return true;
         }
         return false;
     }
@@ -187,7 +185,7 @@ public class Game {
      */
     public boolean doFold(User player) {
         if (isCurrent(player)) {
-            setLastActions(Constants.Actions.FOLD, player);
+//            setLastActions(Constants.Actions.FOLD, player);
             active_players.removeUser(player);
             JSONObject body = new JSONObject();
             body.put("message", "hat gefolded");
@@ -272,7 +270,12 @@ public class Game {
                 System.out.println("NEUE KARTEN WERDEN AUSGETEILT!!!!!!!!!!");
                 lastActions = new ArrayList<>();
                 active_players.resetAllPlayersAction();
-                current = small_blind;
+                if(active_players.contains(small_blind)){
+                    current = small_blind;
+                }else{
+                    int small_blind_index = blind_index % active_players.length;
+                    current = active_players.getUserByIndex(small_blind_index);
+                }
                 JSONObject body = new JSONObject();
                 body.put("message", "ist jetzt am Zug");
                 body.put("sender", current.getName());
@@ -597,7 +600,7 @@ public class Game {
             _available_methods.put(Constants.Actions.CHECK, (lastActionEquals(Constants.Actions.CHECK) || (lastActions.isEmpty())));
             _available_methods.put(Constants.Actions.FOLD, true);
             _available_methods.put(Constants.Actions.BET, lastActionEquals(Constants.Actions.CHECK) || (lastActions.isEmpty()));
-            _available_methods.put(Constants.Actions.CALL, (lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.CALL) ||lastActionEquals(Constants.Actions.RAISE)));
+            _available_methods.put(Constants.Actions.CALL, (lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.CALL) || lastActionEquals(Constants.Actions.RAISE)));
             _available_methods.put(Constants.Actions.RAISE, lastActionEquals(Constants.Actions.RAISE) || lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.CALL));
         }
         return _available_methods;
