@@ -1,8 +1,5 @@
 package server;
 
-/**
- * Created by loster on 20.05.2015.
- */
 public class Room {
 
     private final int MAX_PLAYER = 8;

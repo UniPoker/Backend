@@ -2,9 +2,6 @@ package server;
 
 import java.util.*;
 
-/**
- * Created by loster on 20.05.2015.
- */
 public class CardStack {
     private final String[] POSSIBLE_SYMBOLS = Constants.Cards.Symbols.ALL_SYMBOLS;
     private final int[] POSSIBLE_VALUES = Constants.Cards.Value.ALL_VALUES;

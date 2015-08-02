@@ -8,9 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-/**
- * Created by loster on 23.07.2015.
- */
 public class PokerInterface {
 
     private String[] do_not_authorize = new String[]{"login_user", "register_user"};

@@ -7,9 +7,6 @@ public class DatabaseConnection {
     private static final DatabaseConnection CLASS_INSTANCE = new DatabaseConnection();
     private Connection conn = null;
 
-    /**
-     * creates a connection to the H2 Database. Creates the table Users if not already existence.
-     */
     private DatabaseConnection() {
         try {
             Class.forName("org.h2.Driver");

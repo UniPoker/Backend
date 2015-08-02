@@ -9,7 +9,6 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 import javax.websocket.server.ServerContainer;
 
 
-//@ServerEndpoint("/websocket")
 public class Server {
 
     private org.eclipse.jetty.server.Server server;
@@ -31,7 +30,6 @@ public class Server {
             ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
             wscontainer.addEndpoint(WebsocketEndpoint.class);
             server.start();
-//            server.join();
         }
         catch (Throwable t)
         {

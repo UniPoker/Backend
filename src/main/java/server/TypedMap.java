@@ -3,8 +3,6 @@ package server;
 import java.util.HashMap;
 import java.util.Map;
 
-//from the Book Effective Java
-
 public class TypedMap {
 
     private Map<AbstractKey<?>, Object> map = new HashMap<AbstractKey<?>, Object>();

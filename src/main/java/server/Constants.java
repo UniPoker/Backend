@@ -1,8 +1,5 @@
 package server;
 
-/**
- * Created by loster on 02.08.2015.
- */
 public final class Constants {
 
     private Constants(){}

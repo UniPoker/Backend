@@ -1,8 +1,5 @@
 package server;
 
-/**
- * Created by loster on 19.07.2015.
- */
 public class NotLoggedInException extends Exception {
 
     /**

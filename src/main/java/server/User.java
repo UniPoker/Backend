@@ -2,9 +2,6 @@ package server;
 
 import javax.websocket.Session;
 
-/**
- * Created by Stefan on 17.05.2015.
- */
 public class User {
 
     private Session websession;
