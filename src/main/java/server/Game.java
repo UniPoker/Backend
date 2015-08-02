@@ -280,56 +280,53 @@ public class Game {
             Card _card = cards.get(i);
             needed_value = 14;
             if (_card.getValue() == needed_value) {
-                highest_card_symbol = _card.getSymbol();
-                for (int a = 0; a < 5; a++) {
-                    if (containsCardByValueAndSymbol(cards, highest_card_symbol, needed_value)) {
-                        needed_value--;
-                        if (a == 4) {
-                            return true;
-                        }
-                    } else {
-                        break;
-                    }
-                }
+                Boolean royal_flush = cardsContainStraightFlush(cards, needed_value, _card);
+                if (royal_flush != null) return royal_flush;
             }
         }
         return false;
+    }
+
+    private Boolean cardsContainStraightFlush(ArrayList<Card> cards, int needed_value, Card _card) {
+        String highest_card_symbol;
+        highest_card_symbol = _card.getSymbol();
+        for (int a = 0; a < 5; a++) {
+            if (containsCardByValueAndSymbol(cards, highest_card_symbol, needed_value)) {
+                needed_value--;
+                if (a == 4) {
+                    return true;
+                }
+            } else {
+                break;
+            }
+        }
+        return null;
     }
 
     public boolean hasStraightFlush(ArrayList<Card> cards) {
         int needed_value;
-        String highest_card_symbol;
         for (int i = 0; i < 3; i++) {
             Card _card = cards.get(i);
             needed_value = _card.getValue();
-            highest_card_symbol = _card.getSymbol();
-            for (int a = 0; a < 5; a++) {
-                if (containsCardByValueAndSymbol(cards, highest_card_symbol, needed_value)) {
-                    needed_value--;
-                    if (a == 4) {
-                        return true;
-                    }
-                } else {
-                    break;
-                }
-            }
+            Boolean royal_flush = cardsContainStraightFlush(cards, needed_value, _card);
+            if (royal_flush != null) return royal_flush;
         }
         return false;
     }
 
-    public boolean hasQuads(ArrayList<Card> cards){
+    public boolean hasQuads(ArrayList<Card> cards) {
         return false;
     }
 
-    public boolean hasFlush(ArrayList<Card> cards){
-        
-    }
-
-    public boolean hasFullHouse(ArrayList<Card> cards){
+    public boolean hasFlush(ArrayList<Card> cards) {
         return false;
     }
 
-    public boolean hasStraight(ArrayList<Card> cards){
+    public boolean hasFullHouse(ArrayList<Card> cards) {
+        return false;
+    }
+
+    public boolean hasStraight(ArrayList<Card> cards) {
         int needed_value;
         for (int i = 0; i < 3; i++) {
             Card _card = cards.get(i);
@@ -348,22 +345,22 @@ public class Game {
         return false;
     }
 
-    public boolean hasTrips(ArrayList<Card> cards){
+    public boolean hasTrips(ArrayList<Card> cards) {
         return false;
     }
 
-    public boolean hasTwoPair(ArrayList<Card> cards){
+    public boolean hasTwoPair(ArrayList<Card> cards) {
         return false;
     }
 
-    public boolean hasPair (ArrayList<Card> cards){
+    public boolean hasPair(ArrayList<Card> cards) {
         return false;
     }
 
-    public boolean hasHighCard(ArrayList<Card> cards){
-        if(containsCardByValue(cards, 14)){
+    public boolean hasHighCard(ArrayList<Card> cards) {
+        if (containsCardByValue(cards, 14)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
