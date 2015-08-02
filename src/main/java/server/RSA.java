@@ -1,62 +1,74 @@
 package server;
+import org.json.JSONObject;
+
 import java.math.*;
 import java.util.Random;
 public class RSA {
 
-    private BigInteger q, p, N, e, d, eule;
-    private Random rand;
-    String test;
+    private BigInteger prime_q, prime_p, prime_product, public_key, private_key, eule;
+    private Random random;
+    String decrypted;
     String[] string;
-    BigInteger[]geheimtext;
+    BigInteger[] encrypted;
 
-    public RSA(){
-    }
-    protected void SchlüsselErzeugen(){
-        rand = new Random();
-        p = new BigInteger(1024,100,rand); //...
-        q = new BigInteger(1024,100,rand); //...
-        N = p.multiply(q);	//produkt von p und q
-        eule = (p.subtract(BigInteger.ONE)).multiply((q.subtract(BigInteger.ONE))); //phi-funktion
-        e = new BigInteger(1024,100,rand);  //teil des öffentlichen schlüssels
-        while (eule.gcd(e).compareTo(BigInteger.ONE) > 0 && e.compareTo(eule) < 0 ) {  //gucken ob e teilerfremd ist
-            e.add(BigInteger.ONE);
+    protected JSONObject createKeys(){
+        random = new Random();
+        prime_p = new BigInteger(1024,100, random); //...
+        prime_q = new BigInteger(1024,100, random); //...
+        prime_product = prime_p.multiply(prime_q);	//produkt von prime_p und prime_q
+        eule = (prime_p.subtract(BigInteger.ONE)).multiply((prime_q.subtract(BigInteger.ONE))); //phi-funktion
+        public_key = new BigInteger(1024,100, random);  //teil des öffentlichen schlüssels
+        while (eule.gcd(public_key).compareTo(BigInteger.ONE) > 0 && public_key.compareTo(eule) < 0 ) {  //gucken ob public_key teilerfremd ist
+            public_key.add(BigInteger.ONE);
         }
         try{
-            d = e.modInverse(eule); //versuch d herauszufinden
+            private_key = public_key.modInverse(eule); //versuch private_key herauszufinden
         }
         catch(ArithmeticException e){ //falls nicht möglich, erneuter aufruf
-            SchlüsselErzeugen();
+            createKeys();
         }
-        //System.out.println("Öffentlicher Schlüssel: "+e+" /                     "+N);
-        //System.out.println("Privater Schlüssel: "+d+" /                     "+N);
+        //System.out.println("Öffentlicher Schlüssel: "+public_key+" /                     "+prime_product);
+        //System.out.println("Privater Schlüssel: "+private_key+" /                     "+prime_product);
+        JSONObject response = new JSONObject();
+        response.put("public_key", public_key);
+        response.put("private_key", private_key);
+        response.put("prime_product", prime_product);
+        return response;
     }
 
-    protected void verschlüsseln(String eingabe){
-        char[] a = eingabe.toCharArray();	//string in char umwandeln
-        Integer[] zahlen = new Integer[a.length];	//zwischenschritt zum biginteger
+    //verschlüsseln
+    protected JSONObject encrypt(String input, BigInteger public_key, BigInteger prime_product){
+        char[] a = input.toCharArray();	//string in char umwandeln
+        Integer[] input_numbers = new Integer[a.length];	//zwischenschritt zum biginteger
         string = new String[a.length];	//ist für das biginteger notwendig
         BigInteger [] big = new BigInteger[a.length];	//erklärt sich von selbst
-        geheimtext = new BigInteger[a.length];	//da wird der verschlüsselte text gespeichert
+        encrypted = new BigInteger[a.length];	//da wird der verschlüsselte text gespeichert
         for(int i=0;i<a.length;i++){
-            zahlen[i]=(int)a[i];	//hier werden die chars zum integer, ich benutze hier integer und nicht int, weil int nicht zu string umwandelbar ist
-            string[i]=zahlen[i].toString();	//die integer in Strings umwandeln
+            input_numbers[i]=(int)a[i];	//hier werden die chars zum integer, ich benutze hier integer und nicht int, weil int nicht zu string umwandelbar ist
+            string[i]=input_numbers[i].toString();	//die integer in Strings umwandeln
             big[i]=new BigInteger(string[i]);	//bigintegers erzeugen , damit ich damit rechnen kann
             //System.out.print(" "+big[i]); //zum testen obs klappt
-            geheimtext[i] = big[i].modPow(e, N);
+            encrypted[i] = big[i].modPow(public_key, prime_product);
         }
         //System.out.println(" Dein Text wurde verschlüsselt");
+        JSONObject response = new JSONObject();
+        response.put("encrypted", encrypted);
+        return response;
     }
 
-    protected void entschlüsseln(){
-        test = new String("");
-        BigInteger[] bigKlarZahlen = new BigInteger[geheimtext.length];	//hier werden die entschlüsselten zahlen gespeichert
-        char[]a= new char[geheimtext.length];	//wird zum ausgeben und umwandeln benötig
-        for(int i=0; i<geheimtext.length; i++){
-            bigKlarZahlen[i] = geheimtext[i].modPow(d, N);	//zahlen werden entschlüsselt
+    protected JSONObject entschlüsseln(BigInteger [] encrypted){
+        decrypted = "";
+        BigInteger[] bigKlarZahlen = new BigInteger[this.encrypted.length];	//hier werden die entschlüsselten zahlen gespeichert
+        char[]a= new char[this.encrypted.length];	//wird zum ausgeben und umwandeln benötig
+        for(int i=0; i< this.encrypted.length; i++){
+            bigKlarZahlen[i] = this.encrypted[i].modPow(private_key, prime_product);	//zahlen werden entschlüsselt
             a[i]=(char)bigKlarZahlen[i].intValue();	//mit einem cast auf char werden die Zahlen wieder in buchstaben umgewandelt
             System.out.print(""+a[i]);	//wird jeder buchstabe einzelnd ausgegeben
-            test=test+a[i];	//hier wird es zuerst in einem String gespeichert, damit dieser zum beispiel für ein TextFEld verwendet werden kann
+            decrypted = decrypted +a[i];	//hier wird es zuerst in einem String gespeichert, damit dieser zum beispiel für ein TextFEld verwendet werden kann
         }
-        //System.out.println(test);
+        //System.out.println(decrypted);
+        JSONObject response = new JSONObject();
+        response.put("decrypted", decrypted);
+        return response;
     }
 }
