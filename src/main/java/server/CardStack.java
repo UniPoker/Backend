@@ -6,8 +6,8 @@ import java.util.*;
  * Created by loster on 20.05.2015.
  */
 public class CardStack {
-    private final String[] POSSIBLE_SYMBOLS = {"hearts", "spades", "clubs", "diamonds"};
-    private final int[] POSSIBLE_VALUES = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+    private final String[] POSSIBLE_SYMBOLS = Constants.Cards.Symbols.ALL_SYMBOLS;
+    private final int[] POSSIBLE_VALUES = Constants.Cards.Value.ALL_VALUES;
 
     private Stack<Card> cards;
 
