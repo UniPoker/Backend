@@ -86,7 +86,8 @@ public class UserList {
      * @return server.UserList
      */
     public List<User> getUsers() {
-        return users;
+        List<User> _users = new ArrayList<User>(users);
+        return _users;
     }
 
     public List<User> getUsersExceptUser(User user) {

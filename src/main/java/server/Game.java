@@ -15,7 +15,6 @@ public class Game {
 
     private CardStack card_stack;
     private Card[] board = new Card[5];
-    ;
 
     private UserList players;
     private UserList active_players; //all players in current round
