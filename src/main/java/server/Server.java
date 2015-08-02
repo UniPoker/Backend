@@ -9,7 +9,6 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 import javax.websocket.server.ServerContainer;
 
 
-//@ServerEndpoint("/websocket")
 public class Server {
 
     private org.eclipse.jetty.server.Server server;
@@ -31,7 +30,6 @@ public class Server {
             ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
             wscontainer.addEndpoint(WebsocketEndpoint.class);
             server.start();
-//            server.join();
         }
         catch (Throwable t)
         {
@@ -47,5 +45,18 @@ public class Server {
     {
         Server websocketserver = new Server(8080);
         websocketserver.start();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    websocketserver.close();
+                    DatabaseConnection.getInstance().closeConnection();
+                    System.out.println("Alle Verbindungen geschlossen!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        System.out.println("Server gestartet!");
     }
 }

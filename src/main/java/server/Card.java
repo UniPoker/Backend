@@ -4,9 +4,6 @@ import com.google.common.collect.ComparisonChain;
 
 import java.util.HashMap;
 
-/**
- * Created by loster on 20.05.2015.
- */
 public class Card implements Comparable<Card>{
 
     private int value;

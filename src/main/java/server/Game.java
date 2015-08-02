@@ -6,9 +6,6 @@ import org.json.JSONObject;
 import java.util.*;
 import java.util.stream.Stream;
 
-/**
- * Created by loster on 26.05.2015.
- */
 public class Game {
 
     private Pusher pusher;

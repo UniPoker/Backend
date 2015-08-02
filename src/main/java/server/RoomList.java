@@ -8,9 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by loster on 20.07.2015.
- */
 public class RoomList {
 
     private List<Room> rooms;

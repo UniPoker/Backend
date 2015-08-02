@@ -8,9 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by loster on 20.05.2015.
- */
 public class UserList {
 
     private List<User> users;
@@ -54,7 +51,6 @@ public class UserList {
      * @param user server.User to delete from server.UserList
      */
     public void removeUser(User user) {
-        //TODO was passiert wenn wir hier einen User reinreichen der nicht in der Liste war? dann ist die length einen runter aber kein user gelöscht?!
         boolean removed = users.removeIf(p -> p == user);
         if(removed){
             length--;
