@@ -45,5 +45,18 @@ public class Server {
     {
         Server websocketserver = new Server(8080);
         websocketserver.start();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    websocketserver.close();
+                    DatabaseConnection.getInstance().closeConnection();
+                    System.out.println("Alle Verbindungen geschlossen!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        System.out.println("Server gestartet!");
     }
 }
