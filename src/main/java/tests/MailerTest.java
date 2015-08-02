@@ -28,4 +28,10 @@ public class MailerTest {
         System.out.println(mail);
         assertNotNull(mail);
     }
+
+    @Test
+    public void testSendMail() throws Exception{
+        boolean send_mail = mailer.sendRegistrationMail("jan-niklaswortmann@gmx.net","Registrierung", "Jan-Niklas", "123456");
+        assertTrue(send_mail);
+    }
 }

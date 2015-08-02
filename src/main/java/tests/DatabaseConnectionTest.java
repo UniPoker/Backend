@@ -2,6 +2,7 @@ package tests;
 
 import junit.framework.TestCase;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -21,11 +22,13 @@ public class DatabaseConnectionTest extends TestCase {
         con = TestDatabaseConnection.getInstance();
     }
 
+    @Test
     public void testGetInstance() throws Exception {
         TestDatabaseConnection con1 = TestDatabaseConnection.getInstance();
         assertEquals(con1, con);
     }
 
+    @Test
     public void testInsertUser() throws Exception {
         int count = con.countUsers();
         int i = con.insertUser(new BigInteger(130, new SecureRandom()).toString(32),"test");
@@ -34,11 +37,9 @@ public class DatabaseConnectionTest extends TestCase {
         assertEquals(con.countUsers(), ++count);
     }
 
+    @Test
     public void testGetUserById() throws Exception {
         ResultSet rs = con.getUserById(2);
         assertTrue(rs.next());
-    }
-
-    public void testCloseConnection() throws Exception {
     }
 }
