@@ -96,7 +96,7 @@ public class Game {
             value = value - player.getAlready_paid();
             pod.add(value);
             player.addAlready_paid(value);
-            setLastActions(Actions.RAISE, player);
+            setLastActions(Constants.Actions.RAISE, player);
             setNextUser(player);
             return true;
         } else {
@@ -117,7 +117,7 @@ public class Game {
         if (isCurrent(player)) {
             pod.add(bet);
             player.addAlready_paid(bet);
-            setLastActions(Actions.BET, player);
+            setLastActions(Constants.Actions.BET, player);
             setNextUser(player);
             return true;
         } else {
@@ -138,7 +138,7 @@ public class Game {
             int bet = active_players.getHighestBet() - player.getAlready_paid();
             pod.add(bet);
             player.addAlready_paid(bet);
-            setLastActions(Actions.CALL, player);
+            setLastActions(Constants.Actions.CALL, player);
             setNextUser(player);
             return true;
         } else {
@@ -156,8 +156,8 @@ public class Game {
      */
     public boolean doCheck(User player) {
         if (isCurrent(player)) {
-            if (lastActionEquals(Actions.CHECK) || (player == first && board[2] != null)) {
-                setLastActions(Actions.CHECK, player);
+            if (lastActionEquals(Constants.Actions.CHECK) || (player == first && board[2] != null)) {
+                setLastActions(Constants.Actions.CHECK, player);
                 setNextUser(player);
                 return true;
             }
@@ -174,7 +174,7 @@ public class Game {
     public boolean doFold(User player) {
         if (isCurrent(player)) {
             int i = 0;
-            setLastActions(Actions.FOLD, player);
+            setLastActions(Constants.Actions.FOLD, player);
             active_players.removeUser(player);
             setNextUser(player);
             return true;
@@ -266,9 +266,9 @@ public class Game {
 
     private int getBestHand(ArrayList<Card> cards) {
         if (hasRoyalFlush(cards)) {
-            return HandValues.ROYAL_FLUSH;
+            return Constants.Cards.HandValues.ROYAL_FLUSH;
         } else if (hasStraightFlush(cards)) {
-            return HandValues.STRAIGHT_FLUSH;
+            return Constants.Cards.HandValues.STRAIGHT_FLUSH;
         }
         return 0;
     }
@@ -278,7 +278,7 @@ public class Game {
         String highest_card_symbol;
         for (int i = 0; i < 3; i++) {
             Card _card = cards.get(i);
-            needed_value = 14;
+            needed_value = Constants.Cards.Value.ACE;
             if (_card.getValue() == needed_value) {
                 highest_card_symbol = _card.getSymbol();
                 for (int a = 0; a < 5; a++) {
@@ -322,7 +322,7 @@ public class Game {
     }
 
     public boolean hasFlush(ArrayList<Card> cards){
-        
+        return false;
     }
 
     public boolean hasFullHouse(ArrayList<Card> cards){
@@ -390,12 +390,12 @@ public class Game {
     private void setBlindPlayers() {
         small_blind = active_players.getUserByIndex(blind_index);
         if (small_blind.payMoney(SMALL_BLIND_VALUE)) {
-            setLastActions(Actions.BET, small_blind);
+            setLastActions(Constants.Actions.BET, small_blind);
             pod.add(SMALL_BLIND_VALUE);
         }
         big_blind = active_players.getUserByIndex(raiseBlindIndex());
         if (big_blind.payMoney(BIG_BLIND_VALUE)) {
-            setLastActions(Actions.RAISE, big_blind);
+            setLastActions(Constants.Actions.RAISE, big_blind);
             pod.add(BIG_BLIND_VALUE);
         }
     }
@@ -451,11 +451,11 @@ public class Game {
     private JSONObject getAvailableMethods(User user) {
         JSONObject _available_methods = new JSONObject();
         if (isCurrent(user)) {
-            _available_methods.put(Actions.CHECK, (lastActionEquals(Actions.CHECK) || (isFirstPlayer(user))) && board[2] != null);
-            _available_methods.put(Actions.FOLD, true);
-            _available_methods.put(Actions.BET, lastActionEquals(Actions.CHECK) || (isFirstPlayer(user)) && board[2] != null);
-            _available_methods.put(Actions.CALL, (lastActionEquals(Actions.BET) || lastActionEquals(Actions.RAISE)));
-            _available_methods.put(Actions.RAISE, lastActionEquals(Actions.RAISE) || lastActionEquals(Actions.BET) || lastActionEquals(Actions.CALL));
+            _available_methods.put(Constants.Actions.CHECK, (lastActionEquals(Constants.Actions.CHECK) || (isFirstPlayer(user))) && board[2] != null);
+            _available_methods.put(Constants.Actions.FOLD, true);
+            _available_methods.put(Constants.Actions.BET, lastActionEquals(Constants.Actions.CHECK) || (isFirstPlayer(user)) && board[2] != null);
+            _available_methods.put(Constants.Actions.CALL, (lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.RAISE)));
+            _available_methods.put(Constants.Actions.RAISE, lastActionEquals(Constants.Actions.RAISE) || lastActionEquals(Constants.Actions.BET) || lastActionEquals(Constants.Actions.CALL));
         }
         return _available_methods;
     }

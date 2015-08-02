@@ -3,9 +3,9 @@ package server;
 /**
  * Created by loster on 02.08.2015.
  */
-public final class Contants {
+public final class Constants {
 
-    private Contants(){}
+    private Constants(){}
 
     public static final class Cards{
         private Cards(){}
