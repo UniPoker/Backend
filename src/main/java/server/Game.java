@@ -270,10 +270,10 @@ public class Game {
                 System.out.println("NEUE KARTEN WERDEN AUSGETEILT!!!!!!!!!!");
                 lastActions = new ArrayList<>();
                 active_players.resetAllPlayersAction();
-                if(active_players.contains(small_blind)){
+                if (active_players.contains(small_blind)) {
                     // nur wenn small noch nicht folded hat
                     current = small_blind;
-                }else{
+                } else {
                     int small_blind_index = blind_index % active_players.length;
                     current = active_players.getUserByIndex(small_blind_index);
                 }
@@ -437,14 +437,16 @@ public class Game {
     public Card[] getStraight(ArrayList<Card> cards) {
         int needed_value;
         ArrayList<Card> return_cards;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < cards.size(); i++) {
             Card _card = cards.get(i);
             needed_value = _card.getValue();
             return_cards = new ArrayList<>();
             for (int a = 0; a < 5; a++) {
                 if (containsCardByValue(cards, needed_value)) {
-                    needed_value--;
-                    return_cards.add(new Card(needed_value, cards.get(i + a).getSymbol()));
+                    Card found_card = getCardsByValue(cards, needed_value)[0];
+                    needed_value = (needed_value - 1) % 14;
+                    needed_value = needed_value == 1 ? 14 : needed_value;
+                    return_cards.add(found_card);
                     if (a == 4) {
                         return return_cards.toArray(new Card[return_cards.size()]);
                     }
@@ -494,6 +496,19 @@ public class Game {
 
     private boolean containsCardByValue(List<Card> list, int value) {
         return list.stream().filter(o -> o.getValue() == value).findFirst().isPresent();
+    }
+
+    private int getIndexByValue(List<Card> list, int value) {
+        if (containsCardByValue(list, value)) {
+            int i = 0;
+            for(Card card : list){
+                if(card.getValue() == value){
+                    return i;
+                }
+                i++;
+            }
+        }
+        return -1;
     }
 
     private Card[] getCardsByValue(List<Card> list, int value) {

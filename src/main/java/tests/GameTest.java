@@ -261,7 +261,33 @@ public class GameTest {
         Card[] was_successfull = game.getStraight(cards);
         assertNotNull(was_successfull);
         assertEquals(5,was_successfull.length);
+    }
 
+    @Test
+    public void testHasStraight_1(){
+        Card card_1 = new Card(14,"diamonds");
+        Card card_2 = new Card(12,"hearts");
+        Card card_3 = new Card(13,"hearts");
+        Card card_4 = new Card(10,"spades");
+        Card card_5 = new Card(9,"spades");
+        Card card_6 = new Card(3,"diamonds");
+        Card card_7 = new Card(2,"diamonds");
+        Card [] board = new Card[5];
+        board[0] = card_1;
+        board[1] = card_6;
+        board[2] = card_3;
+        board[3] = card_7;
+        board[4] = card_5;
+        User user = new User();
+        user.setHandCards(card_2);
+        user.setHandCards(card_4);
+        Card [] _cards = Stream.concat(Arrays.stream(board), Arrays.stream(user.getHandCards())).toArray(Card[]::new);
+        ArrayList<Card> cards = new ArrayList<Card>(Arrays.asList(_cards));
+        Collections.sort(cards);
+        Collections.reverse(cards); //damit absteigend:D
+        Card[] was_successfull = game.getStraight(cards);
+        assertNotNull(was_successfull);
+        assertEquals(5,was_successfull.length);
     }
 
     @Test
