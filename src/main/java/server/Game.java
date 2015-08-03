@@ -246,6 +246,7 @@ public class Game {
         current = active_players.getUserByIndex(index);
         boolean no_players_left = active_players.length == 1;
         if ((!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull()) || no_players_left) {
+            // wenn alle etwas gemacht haben und gleich viel bezahlt haben. oder wenn nur noch ein aktiver spieler im Raum ist
             if (last_turn || no_players_left) {
                 is_running = false;
                 JSONObject body = new JSONObject();
@@ -265,12 +266,12 @@ public class Game {
                 pusher.pushToAll("action_performed_notification", body);
                 initRound();
                 return;
-                //Karten verwerten + Sieger ermitteln
             } else {
                 System.out.println("NEUE KARTEN WERDEN AUSGETEILT!!!!!!!!!!");
                 lastActions = new ArrayList<>();
                 active_players.resetAllPlayersAction();
                 if(active_players.contains(small_blind)){
+                    // nur wenn small noch nicht folded hat
                     current = small_blind;
                 }else{
                     int small_blind_index = blind_index % active_players.length;
@@ -288,17 +289,16 @@ public class Game {
 
     private JSONObject getWinner() {
         JSONObject highest_value = new JSONObject().put("value", -1);
-        for (User user : active_players.getUsers()) {
-//            Card[] _cards = Stream.concat(Arrays.stream(board), Arrays.stream(user.getHandCards())).toArray(Card[]::new);
-            Card[] _cards = ArrayUtils.addAll(board, user.getHandCards());
-            ArrayList<Card> cards = new ArrayList<Card>(Arrays.asList(_cards));
-            Collections.sort(cards);
-            Collections.reverse(cards); //damit absteigend
-            JSONObject best_possibility = getBestHand(cards, user);
+        for (User current_user : active_players.getUsers()) {
+            Card[] _cards = ArrayUtils.addAll(board, current_user.getHandCards());
+            ArrayList<Card> current_cards = new ArrayList<>(Arrays.asList(_cards));
+            Collections.sort(current_cards);
+            Collections.reverse(current_cards); //damit absteigend
+            JSONObject best_possibility = getBestHand(current_cards, current_user);
             if (highest_value.getInt("value") < best_possibility.getInt("value")) {
                 highest_value = best_possibility;
             } else if (highest_value.getInt("value") == best_possibility.getInt("value")) {
-                User hihgest_user = (User) highest_value.get("user");
+                // wenn gleichwertige kombination, herausfinden, welche höher ist
                 Card[] highest_combination = (Card[]) highest_value.get("cards");
                 Card[] challenging_combination = (Card[]) best_possibility.get("cards");
 
@@ -311,12 +311,13 @@ public class Game {
                 if (highest_user_value < user_value) {
                     highest_value = best_possibility;
                 } else if (highest_user_value == user_value) {
+                    // wenn kombination gleichwertig, dann wer höhere handkarten hat
                     highest_user_value = 0; //momentaner sieger
                     user_value = 0;
-                    Card[] highest_cards = ArrayUtils.addAll(board, user.getHandCards());
+                    Card[] highest_cards = ArrayUtils.addAll(board, current_user.getHandCards());
                     for (int i = 0; i < highest_cards.length; i++) {
                         highest_user_value += highest_cards[i].getValue();
-                        user_value += cards.get(i).getValue();
+                        user_value += current_cards.get(i).getValue();
                     }
                     if (highest_user_value < user_value) {
                         highest_value = best_possibility;
