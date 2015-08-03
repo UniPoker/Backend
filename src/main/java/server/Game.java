@@ -397,8 +397,8 @@ public class Game {
         for (int i = 0; i < 3; i++) {
             Card _card = cards.get(i);
             needed_value = _card.getValue();
-            Card[] royal_flush = cardsContainStraightFlush(cards, needed_value, _card);
-            return royal_flush;
+            Card[] staright_flush = cardsContainStraightFlush(cards, needed_value, _card);
+            return staright_flush;
         }
         return null;
     }
@@ -501,8 +501,8 @@ public class Game {
     private int getIndexByValue(List<Card> list, int value) {
         if (containsCardByValue(list, value)) {
             int i = 0;
-            for(Card card : list){
-                if(card.getValue() == value){
+            for (Card card : list) {
+                if (card.getValue() == value) {
                     return i;
                 }
                 i++;

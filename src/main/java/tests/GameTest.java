@@ -31,8 +31,8 @@ public class GameTest {
         Card card_3 = new Card(12,"diamonds");
         Card card_4 = new Card(11,"diamonds");
         Card card_5 = new Card(10,"diamonds");
-        Card card_6 = new Card(9,"diamonds");
-        Card card_7 = new Card(8,"diamonds");
+        Card card_6 = new Card(9,"hearts");
+        Card card_7 = new Card(8,"spades");
         Card [] board = new Card[5];
         board[0] = card_1;
         board[1] = card_6;
