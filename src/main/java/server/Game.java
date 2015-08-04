@@ -52,7 +52,7 @@ public class Game {
      */
     public void joinGame(User player) {
         pusher.addUser(player);
-        pushGameDataToUsers("user_joined_notification");
+        pushGameDataToUsers("user_joined_notification", false);
     }
 
     /**
@@ -62,7 +62,7 @@ public class Game {
      */
     public void leaveGame(User player) {
         pusher.removeUser(player);
-        pushGameDataToUsers("user_left_notification");
+        pushGameDataToUsers("user_left_notification", false);
     }
 
     /**
@@ -74,7 +74,7 @@ public class Game {
         if (players.length >= 2 && !is_running) {
             initRound();
         } else {
-            JSONObject body = getJsonGameFrame(player);
+            JSONObject body = getJsonGameFrame(player, false);
             pusher.pushToSingle("user_joined_notification", body, player.getWebsession());
         }
     }
@@ -248,6 +248,7 @@ public class Game {
         if ((!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull()) || no_players_left) {
             // wenn alle etwas gemacht haben und gleich viel bezahlt haben. oder wenn nur noch ein aktiver spieler im Raum ist
             if (last_turn || no_players_left) {
+                boolean show_player_cards = false;
                 is_running = false;
                 JSONObject body = new JSONObject();
                 User won;
@@ -256,6 +257,7 @@ public class Game {
                     body.put("sender", won.getName());
                     body.put("message", "hat gewonnen");
                 } else {
+                    show_player_cards = true;
                     JSONObject winner = getWinner();
                     System.out.println(winner);
                     won = (User) winner.get("user");
@@ -264,7 +266,8 @@ public class Game {
                 }
                 won.setLimit(won.getLimit() + getPodValue());
                 pusher.pushToAll("action_performed_notification", body);
-                initRound();
+                pushGameDataToUsers("action_notification", show_player_cards);
+//                initRound();
                 return;
             } else {
                 System.out.println("NEUE KARTEN WERDEN AUSGETEILT!!!!!!!!!!");
@@ -284,7 +287,7 @@ public class Game {
                 dealBoardCards();
             }
         }
-        pushGameDataToUsers("action_notification");
+        pushGameDataToUsers("action_notification", false);
     }
 
     private JSONObject getWinner() {
@@ -582,17 +585,17 @@ public class Game {
         pusher.pushToAll("action_performed_notification", body);
         previous = active_players.getPreviousUser(first);
         is_running = true;
-        pushGameDataToUsers("round_starts_notification");
+        pushGameDataToUsers("round_starts_notification", false);
     }
 
-    private void pushGameDataToUsers(String event) {
+    private void pushGameDataToUsers(String event, boolean show_player_cards) {
         for (User user : players.getUsers()) {
-            JSONObject body = getJsonGameFrame(user);
+            JSONObject body = getJsonGameFrame(user, show_player_cards);
             pusher.pushToSingle(event, body, user.getWebsession());
         }
     }
 
-    private JSONObject getJsonGameFrame(User user) {
+    private JSONObject getJsonGameFrame(User user, boolean show_player_cards) {
         JSONArray arr = new JSONArray();
         for (Card card : user.getHandCards()) {
             if (card != null) {
@@ -605,7 +608,7 @@ public class Game {
         body.put("pod", getPodValue());
         body.put("your_money", user.getLimit());
         body.put("available_methods", getAvailableMethods(user));
-        body.put("all_users", players.getInterfaceUserList(small_blind, big_blind, current));
+        body.put("all_users", players.getInterfaceUserList(small_blind, big_blind, current, show_player_cards));
         return body;
     }
 

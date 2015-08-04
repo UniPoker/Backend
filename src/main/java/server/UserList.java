@@ -34,7 +34,7 @@ public class UserList {
         length += users.length;
     }
 
-    public UserList(List<User> users){
+    public UserList(List<User> users) {
         this.users = users;
         length = users.size();
     }
@@ -52,7 +52,7 @@ public class UserList {
      */
     public void removeUser(User user) {
         boolean removed = users.removeIf(p -> p == user);
-        if(removed){
+        if (removed) {
             length--;
         }
     }
@@ -146,7 +146,7 @@ public class UserList {
         return arr;
     }
 
-    public JSONArray getInterfaceUserList(User small_blind, User big_blind, User current_user) {
+    public JSONArray getInterfaceUserList(User small_blind, User big_blind, User current_user, boolean show_player_cards) {
         JSONArray arr = new JSONArray();
         for (User user : users) {
             TypedMap map = new TypedMap();
@@ -154,27 +154,40 @@ public class UserList {
             TypedMap.AbstractKey<Boolean> is_big_blind = TypedMap.BooleanKey.is_big_blind;
             TypedMap.AbstractKey<Boolean> is_small_blind = TypedMap.BooleanKey.is_small_blind;
             TypedMap.AbstractKey<Boolean> is_active = TypedMap.BooleanKey.is_active;
+            TypedMap.AbstractKey<Boolean> show_cards = TypedMap.BooleanKey.show_cards;
+            TypedMap.AbstractKey<Card[]> hand_cards = TypedMap.CardArrayKey.hand_cards;
             map.put(username, user.getName());
             map.put(is_big_blind, user == big_blind);
             map.put(is_small_blind, user == small_blind);
             map.put(is_active, current_user == user);
+
+            Card[] player_hand_cards = new Card[2];
+            if (show_player_cards) {
+                player_hand_cards = user.getHandCards();
+            } else {
+                player_hand_cards[0] = new Card(0, "");
+                player_hand_cards[1] = new Card(0, "");
+            }
+            map.put(hand_cards, player_hand_cards);
+            map.put(show_cards, show_player_cards);
+
             arr.put(map.getMap());
         }
         return arr;
     }
 
     public User getPreviousUser(User user) {
-        return this.getUserByIndex((users.indexOf(user) - 1 % length + length) % length) ;
+        return this.getUserByIndex((users.indexOf(user) - 1 % length + length) % length);
     }
 
-    public void resetAllHandCards(){
-        for(User user : users){
+    public void resetAllHandCards() {
+        for (User user : users) {
             user.resetHandCards();
         }
     }
 
-    public void resetAlreadyPaid(){
-        for(User user : users){
+    public void resetAlreadyPaid() {
+        for (User user : users) {
             user.resetPayment();
         }
     }
@@ -182,35 +195,36 @@ public class UserList {
     public boolean allUsersPaidSame() {
         boolean paid_same = true;
         int first_payment = users.get(0).getAlready_paid();
-        for(User user: users){
-            if(first_payment != user.getAlready_paid()){
+        for (User user : users) {
+            if (first_payment != user.getAlready_paid()) {
                 paid_same = false;
             }
         }
         return paid_same;
     }
 
-    public int getHighestBet(){
+    public int getHighestBet() {
         int i = 0;
-        for(User user: users){
+        for (User user : users) {
             int value = user.getAlready_paid();
-            if(value> i){
+            if (value > i) {
                 i = value;
             }
-        }return i;
+        }
+        return i;
     }
 
-    public boolean allPlayersActionNotNull(){
-        for(User user: users){
-            if(user.getLast_action().equals("")){
+    public boolean allPlayersActionNotNull() {
+        for (User user : users) {
+            if (user.getLast_action().equals("")) {
                 return false;
             }
         }
         return true;
     }
 
-    public void resetAllPlayersAction(){
-        for(User user: users){
+    public void resetAllPlayersAction() {
+        for (User user : users) {
             user.setLast_action("");
         }
     }

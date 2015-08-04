@@ -31,10 +31,19 @@ public class TypedMap {
 
     public static enum BooleanKey implements AbstractKey<Boolean> {
 
-        is_small_blind, is_big_blind, is_active;
+        is_small_blind, is_big_blind, is_active, show_cards;
 
         public Class<Boolean> getType() {
             return Boolean.class;
+        }
+    }
+
+    public static enum CardArrayKey implements AbstractKey<Card[]> {
+
+        hand_cards;
+
+        public Class<Card[]> getType() {
+            return Card[].class;
         }
     }
 
