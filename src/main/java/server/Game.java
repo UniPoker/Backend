@@ -605,7 +605,7 @@ public class Game {
         body.put("pod", getPodValue());
         body.put("your_money", user.getLimit());
         body.put("available_methods", getAvailableMethods(user));
-        body.put("all_users", players.getInterfaceUserList(small_blind, big_blind));
+        body.put("all_users", players.getInterfaceUserList(small_blind, big_blind, current));
         return body;
     }
 

@@ -146,16 +146,18 @@ public class UserList {
         return arr;
     }
 
-    public JSONArray getInterfaceUserList(User smallblind, User bigblind) {
+    public JSONArray getInterfaceUserList(User small_blind, User big_blind, User current_user) {
         JSONArray arr = new JSONArray();
         for (User user : users) {
             TypedMap map = new TypedMap();
             TypedMap.AbstractKey<String> username = TypedMap.StringKey.username;
             TypedMap.AbstractKey<Boolean> is_big_blind = TypedMap.BooleanKey.is_big_blind;
             TypedMap.AbstractKey<Boolean> is_small_blind = TypedMap.BooleanKey.is_small_blind;
+            TypedMap.AbstractKey<Boolean> is_active = TypedMap.BooleanKey.is_active;
             map.put(username, user.getName());
-            map.put(is_big_blind, user == bigblind);
-            map.put(is_small_blind, user == smallblind);
+            map.put(is_big_blind, user == big_blind);
+            map.put(is_small_blind, user == small_blind);
+            map.put(is_active, current_user == user);
             arr.put(map.getMap());
         }
         return arr;

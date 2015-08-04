@@ -31,7 +31,7 @@ public class TypedMap {
 
     public static enum BooleanKey implements AbstractKey<Boolean> {
 
-        is_small_blind, is_big_blind;
+        is_small_blind, is_big_blind, is_active;
 
         public Class<Boolean> getType() {
             return Boolean.class;
