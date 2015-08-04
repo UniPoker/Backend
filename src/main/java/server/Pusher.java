@@ -1,5 +1,6 @@
 package server;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.websocket.Session;
@@ -21,6 +22,18 @@ public class Pusher {
         try {
             for (Session session : sessions) {
                 JSONObject json = Helper.getJsonFrame(0, "Nachricht erhalten", body, event);
+                session.getBasicRemote().sendText(json.toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void pushToAll(String event, JSONArray body) {
+        try {
+            for (Session session : sessions) {
+                JSONObject json = Helper.getJsonFrame(0, "Nachricht erhalten", new JSONObject(), event);
+                json.put("body",body);
                 session.getBasicRemote().sendText(json.toString());
             }
         } catch (IOException e) {

@@ -37,7 +37,7 @@ public class PokerInterface {
             case "list_rooms":
                 return list_rooms(all_rooms);
             case "create_room":
-                return create_room(current_user, all_rooms);
+                return create_room(current_user, all_rooms, connected_users);
             case "send_message":
                 return send_message(data, all_rooms, connected_users, current_user);
             case "join_room":
@@ -188,10 +188,13 @@ public class PokerInterface {
      * @param all_rooms    list of all rooms so the room can be added
      * @return the id of the new room or the message that the user is already in a room
      */
-    private JSONObject create_room(User current_user, RoomList all_rooms) {
+    private JSONObject create_room(User current_user, RoomList all_rooms, UserList users) {
         if (current_user.getRoomId() == -1) {
             Room new_room = all_rooms.addNewRoom(current_user);
+            Pusher pusher = new Pusher(users);
             JSONObject body = new JSONObject().put("room_id", new_room.getId());
+            JSONArray arr = all_rooms.getInterfaceRoomList();
+            pusher.pushToAll("new_rooms_notification",arr);
             return Helper.getJsonFrame(0, "Raum erfolgreich angelegt", body, "create_room_response");
         } else {
             return Helper.getJsonFrame(1, "Bereits in Raum", new JSONObject(), "create_room_response");
