@@ -72,8 +72,14 @@ public class Game {
         //TODO sollte das vielleicht boolean sein um zu wissen ob es los geht oder nicht?
         //TODO das ganze bei den anderen Methoden auch  (doRaise...)
         if (players.length >= 2 && !is_running) {
+            JSONObject body = new JSONObject();
+            body.put("message", "Runde beginnt");
+            pusher.pushToSingle("request_start_round_response", body, player.getWebsession());
             initRound();
         } else {
+            JSONObject start_body = new JSONObject();
+            start_body.put("message", "Runde konnte nicht gestartet werden");
+            pusher.pushToSingle("request_start_round_response", start_body, player.getWebsession());
             JSONObject body = getJsonGameFrame(player, false);
             pusher.pushToSingle("user_joined_notification", body, player.getWebsession());
         }
@@ -265,6 +271,7 @@ public class Game {
                     body.put("message", "hat gewonnen mit " + winner.getInt("value"));
                 }
                 won.setLimit(won.getLimit() + getPodValue());
+                current = null; //no actions available after game is done
                 pusher.pushToAll("action_performed_notification", body);
                 pushGameDataToUsers("action_notification", show_player_cards);
 //                initRound();
@@ -608,11 +615,12 @@ public class Game {
         body.put("pod", getPodValue());
         body.put("your_money", user.getLimit());
         body.put("available_methods", getAvailableMethods(user));
+        body.put("call_value", players.getCallValueForUser(user));
+        body.put("is_running", is_running); //to start a new round in frontend
         body.put("all_users", players.getInterfaceUserList(small_blind, big_blind, current, show_player_cards));
         return body;
     }
 
-    //TODO möglicher Weise fehlerhaft!!!
     private JSONObject getAvailableMethods(User user) {
         JSONObject _available_methods = new JSONObject();
         if (isCurrent(user)) {

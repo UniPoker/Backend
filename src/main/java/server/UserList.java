@@ -214,6 +214,12 @@ public class UserList {
         return i;
     }
 
+    public int getCallValueForUser(User user) {
+        int highest_bet = getHighestBet();
+        int already_paid = user.getAlready_paid();
+        return highest_bet - already_paid;
+    }
+
     public boolean allPlayersActionNotNull() {
         for (User user : users) {
             if (user.getLast_action().equals("")) {
