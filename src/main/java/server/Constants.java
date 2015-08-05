@@ -35,7 +35,7 @@ public final class Constants {
             public static final String[] ALL_SYMBOLS = {HEARTS,SPADES,CLUBS,DIAMONDS};
         }
 
-        public final class HandValues {
+        public static final class HandValues {
             private HandValues(){}
 
             public static final int ROYAL_FLUSH = 10;
@@ -48,6 +48,33 @@ public final class Constants {
             public static final int TWO_PAIR = 3;
             public static final int PAIR = 2;
             public static final int HIGH_CARD = 1;
+
+            public static final String getCombinationValue(int value) {
+                switch(value){
+                    case HIGH_CARD:
+                        return "High Card";
+                    case PAIR:
+                        return "einem Paar";
+                    case TWO_PAIR:
+                        return "einem Two Pair";
+                    case TRIPS:
+                        return "einem Drilling";
+                    case FLUSH:
+                        return "einem Flush";
+                    case FULL_HOUSE:
+                        return "einem Full House";
+                    case QUADS:
+                        return "einem Vierling";
+                    case ROYAL_FLUSH:
+                        return "einem Royal Flush!!";
+                    case STRAIGHT:
+                        return "einer Straße";
+                    case STRAIGHT_FLUSH:
+                        return "einer Straight Flush";
+                    default:
+                        return "";
+                }
+            }
 
         }
     }

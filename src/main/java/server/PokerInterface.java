@@ -67,6 +67,12 @@ public class PokerInterface {
 
     private JSONObject do_bet(RoomList all_rooms, JSONObject data, User user) {
         int bet = data.getInt("bet");
+        if (bet <= 0) {
+            return Helper.getJsonFrame(2, "Bet muss größer 0 sein", new JSONObject(), "do_bet_response");
+        }
+        if (bet > user.getLimit()) {
+            return Helper.getJsonFrame(3, "Zuwenig Geld!", new JSONObject(), "do_bet_response");
+        }
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
         boolean is_successfull = game.doBet(user, bet);
@@ -80,6 +86,9 @@ public class PokerInterface {
     private JSONObject do_call(RoomList all_rooms, User user) {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
+        if (game.getActive_players().getCallValueForUser(user) > user.getLimit()) {
+            return Helper.getJsonFrame(2, "Zuwenig Geld!", new JSONObject(), "do_raise_response");
+        }
         boolean is_successfull = game.doCall(user);
         if (is_successfull) {
             return Helper.getJsonFrame(0, "Call erfolgreich", new JSONObject(), "do_call_response");
@@ -101,8 +110,14 @@ public class PokerInterface {
 
     private JSONObject do_raise(RoomList all_rooms, JSONObject data, User user) {
         int raise = data.getInt("raise");
+        if (raise <= 0) {
+            return Helper.getJsonFrame(2, "Gebot muss größer 0 sein.", new JSONObject(), "do_raise_response");
+        }
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
+        if (game.getActive_players().getHighestBet() + raise > user.getLimit()) {
+            return Helper.getJsonFrame(3, "Zuwenig Geld!", new JSONObject(), "do_raise_response");
+        }
         boolean is_successfull = game.doRaise(user, raise);
         if (is_successfull) {
             return Helper.getJsonFrame(0, "Raise erfolgreich", new JSONObject(), "do_raise_response");
@@ -194,7 +209,7 @@ public class PokerInterface {
             Pusher pusher = new Pusher(users);
             JSONObject body = new JSONObject().put("room_id", new_room.getId());
             JSONArray arr = all_rooms.getInterfaceRoomList();
-            pusher.pushToAll("new_rooms_notification",arr);
+            pusher.pushToAll("new_rooms_notification", arr);
             return Helper.getJsonFrame(0, "Raum erfolgreich angelegt", body, "create_room_response");
         } else {
             return Helper.getJsonFrame(1, "Bereits in Raum", new JSONObject(), "create_room_response");

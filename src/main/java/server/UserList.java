@@ -192,17 +192,6 @@ public class UserList {
         }
     }
 
-    public boolean allUsersPaidSame() {
-        boolean paid_same = true;
-        int first_payment = users.get(0).getAlready_paid();
-        for (User user : users) {
-            if (first_payment != user.getAlready_paid()) {
-                paid_same = false;
-            }
-        }
-        return paid_same;
-    }
-
     public int getHighestBet() {
         int i = 0;
         for (User user : users) {
@@ -212,6 +201,17 @@ public class UserList {
             }
         }
         return i;
+    }
+
+    public boolean allUsersPaidSame() {
+        boolean paid_same = true;
+        int first_payment = users.get(0).getAlready_paid();
+        for (User user : users) {
+            if (first_payment != user.getAlready_paid()) {
+                paid_same = false;
+            }
+        }
+        return paid_same;
     }
 
     public int getCallValueForUser(User user) {

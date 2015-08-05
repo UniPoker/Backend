@@ -65,6 +65,10 @@ public class Game {
         pushGameDataToUsers("user_left_notification", false);
     }
 
+    public UserList getActive_players(){
+        return active_players;
+    }
+
     /**
      * lets the Game start. Only possible if there are two or more Players
      */
@@ -268,7 +272,7 @@ public class Game {
                     System.out.println(winner);
                     won = (User) winner.get("user");
                     body.put("sender", won.getName());
-                    body.put("message", "hat gewonnen mit " + winner.getInt("value"));
+                    body.put("message", "hat gewonnen mit " + Constants.Cards.HandValues.getCombinationValue(winner.getInt("value")));
                 }
                 won.setLimit(won.getLimit() + getPodValue());
                 current = null; //no actions available after game is done
