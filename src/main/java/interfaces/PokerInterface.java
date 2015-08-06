@@ -1,14 +1,37 @@
-package server;
+package interfaces;
 
+import game.Game;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+import rooms.Room;
+import rooms.RoomList;
+import server.Pusher;
+import users.User;
+import users.UserList;
+import utils.DatabaseConnection;
+import utils.Helper;
+import utils.Mailer;
+import utils.NotLoggedInException;
 
 import javax.mail.MessagingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
+/**
+ * This class defines the poker interface which can be accessed
+ * with interface_name = "PokerInterface"
+ * It contains the complete request- and response logic
+ *
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ * @see org.json.JSONArray
+ * @see org.json.JSONObject
+ * @see javax.mail.MessagingException
+ * @see java.sql.ResultSet
+ * @see java.sql.SQLException
+ * @see java.util.Arrays
+ */
 public class PokerInterface {
 
     private String[] do_not_authorize = new String[]{"login_user", "register_user"};
@@ -65,13 +88,21 @@ public class PokerInterface {
         }
     }
 
+    /**
+     * This method perform a bet if the user is at turn
+     *
+     * @param all_rooms needed to get the game of the room
+     * @param data holds the information about the bet (int) at the key "bet"
+     * @param user the user who wants to perform a bet
+     * @return JSONObject with the response (status: 0 if OK, 1 if not, 2 bet have to be bigger than 0, 3 bet is to high)
+     */
     private JSONObject do_bet(RoomList all_rooms, JSONObject data, User user) {
         int bet = data.getInt("bet");
         if (bet <= 0) {
             return Helper.getJsonFrame(2, "Bet muss größer 0 sein", new JSONObject(), "do_bet_response");
         }
         if (bet > user.getLimit()) {
-            return Helper.getJsonFrame(3, "Zuwenig Geld!", new JSONObject(), "do_bet_response");
+            return Helper.getJsonFrame(3, "Guthaben reicht nicht aus", new JSONObject(), "do_bet_response");
         }
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
@@ -83,11 +114,18 @@ public class PokerInterface {
         }
     }
 
+    /**
+     * This method perform a call if the user is at turn
+     *
+     * @param all_rooms needed to get the game of the room
+     * @param user the user who wants to perform a call
+     * @return JSONObject with the response (status: 0 if OK, 1 if not, 2 user needs more money)
+     */
     private JSONObject do_call(RoomList all_rooms, User user) {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
         if (game.getActive_players().getCallValueForUser(user) > user.getLimit()) {
-            return Helper.getJsonFrame(2, "Zuwenig Geld!", new JSONObject(), "do_raise_response");
+            return Helper.getJsonFrame(2, "Guthaben reicht nicht aus", new JSONObject(), "do_raise_response");
         }
         boolean is_successfull = game.doCall(user);
         if (is_successfull) {
@@ -97,6 +135,13 @@ public class PokerInterface {
         }
     }
 
+    /**
+     * This method perform a check if the user is at turn
+     *
+     * @param all_rooms needed to get the game of the room
+     * @param user the user who wants to perform a check
+     * @return JSONObject with the response (status: 0 if OK, 1 if not)
+     */
     private JSONObject do_check(RoomList all_rooms, User user) {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
@@ -108,6 +153,14 @@ public class PokerInterface {
         }
     }
 
+    /**
+     * This method perform a raise if the user is at turn
+     *
+     * @param all_rooms needed to get the game of the room
+     * @param data holds the information about the raise (int) at the key "raise"
+     * @param user the user who wants to perform a raise
+     * @return JSONObject with the response (status: 0 if OK, 1 if not, 2 raise have to be bigger than 0, 3 bet is to high)
+     */
     private JSONObject do_raise(RoomList all_rooms, JSONObject data, User user) {
         int raise = data.getInt("raise");
         if (raise <= 0) {
@@ -115,8 +168,8 @@ public class PokerInterface {
         }
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
-        if (game.getActive_players().getHighestBet() + raise > user.getLimit()) {
-            return Helper.getJsonFrame(3, "Zuwenig Geld!", new JSONObject(), "do_raise_response");
+        if (game.getActive_players().getHighestBet()- user.getAlready_paid() + raise > user.getLimit()) {
+            return Helper.getJsonFrame(3, "Guthaben reicht nicht aus.", new JSONObject(), "do_raise_response");
         }
         boolean is_successfull = game.doRaise(user, raise);
         if (is_successfull) {
@@ -126,6 +179,13 @@ public class PokerInterface {
         }
     }
 
+    /**
+     * This method perform a fold if the user is at turn
+     *
+     * @param all_rooms needed to get the game of the room
+     * @param user the user who wants to perform a fold
+     * @return JSONObject with the response (status: 0 if OK, 1 if not)
+     */
     private JSONObject do_fold(RoomList all_rooms, User user) {
         Room room = all_rooms.getRoomByRoomId(user.getRoomId());
         Game game = room.getGame();
@@ -223,7 +283,7 @@ public class PokerInterface {
      * @param data         the data so we can get "room_id"
      * @param current_user the requesting user
      * @param all_rooms    list of all rooms so the room can be found by room_id
-     * @return the room id if the user is joined successful
+     * @return the a jsonobject with the room id if the user is joined successful
      */
     private JSONObject join_room(JSONObject data, User current_user, RoomList all_rooms) {
         int room_id = data.getInt("room_id");
@@ -248,6 +308,14 @@ public class PokerInterface {
         }
     }
 
+    /**
+     * possible event of PokerInterface.
+     * lets the requesting user leave a room if it exists
+     *
+     * @param user who wants to leave the room
+     * @param all_rooms list of all rooms so the room can be found by room_id
+     * @return jsonobject with status 0 if successfull
+     */
     private JSONObject leave_room(User user, RoomList all_rooms) {
         int room_id = user.getRoomId();
         Room room = all_rooms.getRoomByRoomId(room_id);
@@ -258,6 +326,18 @@ public class PokerInterface {
         return Helper.getJsonFrame(0, "Raum verlassen", new JSONObject(), "leave_room_response");
     }
 
+    /**
+     * a possible request of PokerInterface
+     * push a notification to all players in a room
+     * if the user is not in a room the push notification will go to each
+     * logged in user.
+     *
+     * @param data contains the message to be sent.
+     * @param all_rooms needed to get the room if the user is in a room.
+     * @param connected_users a list of all logged in users
+     * @param current_user the user who wants to send a message
+     * @return
+     */
     private JSONObject send_message(JSONObject data, RoomList all_rooms, UserList connected_users, User current_user) {
         int room_id = data.getInt("room_id");
         Room room = all_rooms.getRoomByRoomId(room_id);
@@ -275,6 +355,16 @@ public class PokerInterface {
         return Helper.getJsonFrame(0, "Nachricht erfolgreich gesendet", new JSONObject(), "send_message_response");
     }
 
+    /**
+     * a possible request of PokerInterface
+     * this request starts a new round if there are more than
+     * 2 players in this game
+     *
+     * @param all_rooms a list of all rooms the get the room by its id
+     * @param data contains the room_id
+     * @param current_user the user who wants to start a round
+     * @return a jsonobject with status 0 if successfull else 1
+     */
     private JSONObject start_round(RoomList all_rooms, JSONObject data, User current_user) {
         int room_id = data.getInt("room_id");
         Room room = all_rooms.getRoomByRoomId(room_id);
@@ -285,6 +375,18 @@ public class PokerInterface {
         return Helper.getJsonFrame(0, "Rundenstart erfolgreich angefragt", new JSONObject(), "start_round_response");
     }
 
+
+    /**
+     * a possible request of PokerInterface
+     * this request performs a logout out for the given user.
+     * For this purpose the user will be remove from the connected_user list,
+     * from the Userlist of the given room etc.
+     *
+     * @param user who wants to logout
+     * @param all_rooms needed to get the room where the user is.
+     * @param connected_users to remove the given user from this list
+     * @return a logout_user_respone json with status 0
+     */
     private JSONObject logout_user(User user, RoomList all_rooms, UserList connected_users) {
         logoutUser(user, all_rooms, connected_users);
         return Helper.getJsonFrame(0, "Erfolgreich abgemeldet", new JSONObject(), "logout_user_response");
@@ -301,6 +403,20 @@ public class PokerInterface {
         connected_users.removeUser(user);
     }
 
+
+    /**
+     * a possible request of PokerInterface
+     * perform a registration for a user.
+     * write its data into the database
+     * When succesfull it sends the user a mail with his username and password
+     * @see DatabaseConnection
+     * @see Mailer#sendRegistrationMail(String, String, String, String)
+     *
+     * @param data containing all data needed for a registration (name, password, email)
+     * @return json with status 0 if correct else 1
+     * @throws SQLException when insert fails
+     * @throws MessagingException when email not correct
+     */
     private JSONObject register_user(JSONObject data) throws SQLException, MessagingException {
         ResultSet rs = con.getUserByName(data.getString("name"));
         if (!rs.next()) {

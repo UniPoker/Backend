@@ -1,5 +1,13 @@
-package server;
+package utils;
 
+/**
+ * This class defines a new exception, used to check
+ * if a user is logged in.
+ *
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ * @see Exception
+ */
 public class NotLoggedInException extends Exception {
 
     /**

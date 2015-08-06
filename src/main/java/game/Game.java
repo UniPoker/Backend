@@ -1,13 +1,27 @@
-package server;
+package game;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.eclipse.jetty.util.ArrayUtil;
+import cards.Card;
+import cards.CardStack;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import server.Pusher;
+import users.User;
+import users.UserList;
+import utils.Constants;
 
-import java.util.*;
-import java.util.stream.Stream;
+import javax.websocket.Session;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * This class contains the game logic for poker.
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ * @see org.json.JSONArray
+ * @see org.json.JSONObject
+ * @see java.util.ArrayList
+ * @see java.util.List
+ */
 public class Game {
 
     private Pusher pusher;
@@ -214,16 +228,6 @@ public class Game {
     }
 
     /**
-     * TODO hier einfügen
-     *
-     * @param possible_winner
-     */
-    private void noPlayersLeft(User possible_winner) {
-        possible_winner.setLimit(possible_winner.getLimit() + getPodValue());
-        startRound(possible_winner);
-    }
-
-    /**
      * checks if the given User is the current User so he can perform an Action
      *
      * @param player the player to check if he is the current player
@@ -268,7 +272,7 @@ public class Game {
                     body.put("message", "hat gewonnen");
                 } else {
                     show_player_cards = true;
-                    JSONObject winner = getWinner();
+                    JSONObject winner = new EvaluateHandCards().getWinner(active_players, board);
                     System.out.println(winner);
                     won = (User) winner.get("user");
                     body.put("sender", won.getName());
@@ -301,260 +305,9 @@ public class Game {
         pushGameDataToUsers("action_notification", false);
     }
 
-    private JSONObject getWinner() {
-        JSONObject highest_value = new JSONObject().put("value", -1);
-        for (User current_user : active_players.getUsers()) {
-            Card[] _cards = ArrayUtils.addAll(board, current_user.getHandCards());
-            ArrayList<Card> current_cards = new ArrayList<>(Arrays.asList(_cards));
-            Collections.sort(current_cards);
-            Collections.reverse(current_cards); //damit absteigend
-            JSONObject best_possibility = getBestHand(current_cards, current_user);
-            if (highest_value.getInt("value") < best_possibility.getInt("value")) {
-                highest_value = best_possibility;
-            } else if (highest_value.getInt("value") == best_possibility.getInt("value")) {
-                // wenn gleichwertige kombination, herausfinden, welche höher ist
-                Card[] highest_combination = (Card[]) highest_value.get("cards");
-                Card[] challenging_combination = (Card[]) best_possibility.get("cards");
-
-                int highest_user_value = 0; //momentaner sieger
-                int user_value = 0; //herausforderer
-                for (int i = 0; i < highest_combination.length; i++) {
-                    highest_user_value += highest_combination[i].getValue();
-                    user_value += challenging_combination[i].getValue();
-                }
-                if (highest_user_value < user_value) {
-                    highest_value = best_possibility;
-                } else if (highest_user_value == user_value) {
-                    // wenn kombination gleichwertig, dann wer höhere handkarten hat
-                    highest_user_value = 0; //momentaner sieger
-                    user_value = 0;
-                    Card[] highest_cards = ArrayUtils.addAll(board, current_user.getHandCards());
-                    for (int i = 0; i < highest_cards.length; i++) {
-                        highest_user_value += highest_cards[i].getValue();
-                        user_value += current_cards.get(i).getValue();
-                    }
-                    if (highest_user_value < user_value) {
-                        highest_value = best_possibility;
-                    } else if (highest_user_value == user_value) {
-                        //TODO SPLITPOT
-                        System.out.println("Splitpot implementieren");
-                    }
-                }
-            }
-//            if (hand_value > highest_value) {
-//                highest_value = hand_value;
-//                possible_winner = user;
-//            }
-        }
-        return highest_value;
-    }
-
-    public JSONObject getBestHand(ArrayList<Card> cards, User user) {
-        Card[] best_cards;
-        if ((best_cards = getRoyalFlush(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.ROYAL_FLUSH);
-        } else if ((best_cards = getStraightFlush(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.STRAIGHT_FLUSH);
-        } else if ((best_cards = getQuads(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.QUADS);
-        } else if ((best_cards = getFullHouse(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.FULL_HOUSE);
-        } else if ((best_cards = getFlush(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.FLUSH);
-        } else if ((best_cards = getStraight(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.STRAIGHT);
-        } else if ((best_cards = getTrips(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.TRIPS);
-        } else if ((best_cards = getTwoPair(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.TWO_PAIR);
-        } else if ((best_cards = getPair(new ArrayList<Card>(cards))) != null) {
-            return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.PAIR);
-        }
-        best_cards = getHighCard(user);
-        return Helper.getWinnerJSON(user, best_cards, Constants.Cards.HandValues.HIGH_CARD);
-    }
-
-    public Card[] getRoyalFlush(ArrayList<Card> cards) {
-        int needed_value;
-        for (int i = 0; i < 3; i++) {
-            Card _card = cards.get(i);
-            needed_value = Constants.Cards.Value.ACE;
-            if (_card.getValue() == needed_value) {
-                Card[] royal_flush = cardsContainStraightFlush(cards, needed_value, _card);
-                return royal_flush;
-            }
-        }
-        return null;
-    }
-
-    private Card[] cardsContainStraightFlush(ArrayList<Card> cards, int needed_value, Card first_card) {
-        ArrayList<Card> return_cards;
-        String highest_card_symbol;
-        highest_card_symbol = first_card.getSymbol();
-        return_cards = new ArrayList<>();
-        for (int a = 0; a < 5; a++) {
-            if (containsCardByValueAndSymbol(cards, highest_card_symbol, needed_value)) {
-                needed_value--;
-                return_cards.add(new Card(needed_value, highest_card_symbol));
-                if (a == 4) {
-                    return return_cards.toArray(new Card[return_cards.size()]);
-                }
-            } else {
-                break;
-            }
-        }
-        return null;
-    }
-
-    public Card[] getStraightFlush(ArrayList<Card> cards) {
-        int needed_value;
-        for (int i = 0; i < 3; i++) {
-            Card _card = cards.get(i);
-            needed_value = _card.getValue();
-            Card[] staright_flush = cardsContainStraightFlush(cards, needed_value, _card);
-            return staright_flush;
-        }
-        return null;
-    }
-
-    public Card[] getQuads(ArrayList<Card> cards) {
-        return sameAmountOfValue(cards, 4);
-    }
-
-    public Card[] getFlush(ArrayList<Card> cards) {
-        for (int i = 0; i < 3; i++) {
-            Card card = cards.get(i);
-            Card[] found_cards = getCardsBySymbol(cards, card.getSymbol());
-            if (found_cards.length == 5) {
-                return found_cards;
-            }
-        }
-        return null;
-    }
-
-    public Card[] getFullHouse(ArrayList<Card> cards) {
-        Card[] trips = getTrips(cards);
-        if (trips != null) {
-            for (Card card : trips) {
-                cards.removeIf(c -> c == card);
-            }
-            Card[] pair = getPair(cards);
-            if (pair != null) {
-                Card[] full_house = ArrayUtils.addAll(trips, pair);
-                return full_house;
-            }
-        }
-
-        return null;
-    }
-
-    public Card[] getStraight(ArrayList<Card> cards) {
-        int needed_value;
-        ArrayList<Card> return_cards;
-        for (int i = 0; i < cards.size(); i++) {
-            Card _card = cards.get(i);
-            needed_value = _card.getValue();
-            return_cards = new ArrayList<>();
-            for (int a = 0; a < 5; a++) {
-                if (containsCardByValue(cards, needed_value)) {
-                    Card found_card = getCardsByValue(cards, needed_value)[0];
-                    needed_value = (needed_value - 1) % 14;
-                    needed_value = needed_value == 1 ? 14 : needed_value;
-                    return_cards.add(found_card);
-                    if (a == 4) {
-                        return return_cards.toArray(new Card[return_cards.size()]);
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-        return null;
-    }
-
-    public Card[] getTrips(ArrayList<Card> cards) {
-        return sameAmountOfValue(cards, 3);
-    }
-
-    public Card[] getTwoPair(ArrayList<Card> cards) {
-        Card[] first_pair = getPair(cards);
-        if (first_pair != null) {
-            for (Card card : first_pair) {
-                cards.removeIf(c -> c == card);
-            }
-            Card[] second_pair = getPair(cards);
-            if (second_pair != null) {
-                Card[] two_pair = ArrayUtils.addAll(first_pair, second_pair);
-                return two_pair;
-            }
-        }
-        return null;
-    }
-
-    public Card[] getPair(ArrayList<Card> cards) {
-        return sameAmountOfValue(cards, 2);
-    }
-
-    public Card[] getHighCard(User user) {
-        Card[] cards = user.getHandCards();
-        if (cards[0].getValue() >= cards[1].getValue()) {
-            return new Card[]{cards[0]};
-        } else {
-            return new Card[]{cards[1]};
-        }
-    }
-
-    private boolean containsCardByValueAndSymbol(List<Card> list, String symbol, int value) {
-        return list.stream().filter(o -> o.getSymbol().equals(symbol) && o.getValue() == value).findFirst().isPresent();
-    }
-
-    private boolean containsCardByValue(List<Card> list, int value) {
-        return list.stream().filter(o -> o.getValue() == value).findFirst().isPresent();
-    }
-
-    private int getIndexByValue(List<Card> list, int value) {
-        if (containsCardByValue(list, value)) {
-            int i = 0;
-            for (Card card : list) {
-                if (card.getValue() == value) {
-                    return i;
-                }
-                i++;
-            }
-        }
-        return -1;
-    }
-
-    private Card[] getCardsByValue(List<Card> list, int value) {
-        return list.stream().filter(o -> o.getValue() == value).toArray(Card[]::new);
-    }
-
-    private Card[] getCardsBySymbol(List<Card> list, String symbol) {
-        return list.stream().filter(o -> o.getSymbol() == symbol).toArray(Card[]::new);
-    }
-
-    private Card[] sameAmountOfValue(ArrayList<Card> cards, int matches) {
-        int steps = cards.size() - matches;
-        for (int i = 0; i <= steps; i++) {
-            Card card = cards.get(i);
-            Card[] found_cards = getCardsByValue(cards, card.getValue());
-            if (found_cards.length == matches) {
-                return found_cards;
-            }
-        }
-        return null;
-    }
-
-//    private boolean hasCard (int value, String color){
-//
-//    }
-//
-//    private boolean gotRoyalFlush(User user) {
-//        return false;
-//    }
-
     /**
      * sets the small and the big blind of this round
+     * sets the lastAction of the small and big blind user
      */
     private void setBlindPlayers() {
         small_blind = active_players.getUserByIndex(blind_index);
@@ -599,6 +352,14 @@ public class Game {
         pushGameDataToUsers("round_starts_notification", false);
     }
 
+
+    /**
+     * Sends a jsonobject to all players. This notification contains the relevant data for the game.
+     * @see Game#getJsonGameFrame(User, boolean)
+     * @see Pusher#pushToSingle(String, JSONObject, Session)
+     * @param event The event for the push notification
+     * @param show_player_cards a boolean if the player cards have to be shown or not
+     */
     private void pushGameDataToUsers(String event, boolean show_player_cards) {
         for (User user : players.getUsers()) {
             JSONObject body = getJsonGameFrame(user, show_player_cards);
@@ -606,6 +367,34 @@ public class Game {
         }
     }
 
+
+    /**
+     * This method returns a JSONObject which is needed for all game push notification.
+     * This JSONObject contains the keys:
+     * <ul>
+     * <li> cards Type: JSONArray</li>
+     * <ul>
+     *     <li> value Type: String </li>
+     *     <li> symbol Type: String </li>
+     * </ul>
+     * <li> your_turn Type: Boolean</li>
+     * <li> your_money Type: Int</li>
+     * <li> call_value Type: Int</li>
+     * <li> is_running Type: Boolean</li>
+     * <li> all_users Type: JSONArray</li>
+     * <ul>
+     *     <li>username Type: String</li>
+     *     <li>is_big_blind Type: Boolean</li>
+     *     <li>is_small_blind Type: Boolean</li>
+     *     <li>is_active Type: Boolean</li>
+     *     <li>show_cards Type: Boolean</li>
+     *     <li>hand_cards Type: JSONArray</li>
+     * </ul>
+     * </ul>
+     * @param user a User object to get access to his hand cards, his limit etc.
+     * @param show_player_cards a boolean to decide if the hand cards have to be shown or not.
+     * @return descriped above
+     */
     private JSONObject getJsonGameFrame(User user, boolean show_player_cards) {
         JSONArray arr = new JSONArray();
         for (Card card : user.getHandCards()) {
@@ -637,6 +426,11 @@ public class Game {
         return _available_methods;
     }
 
+    /**
+     * A method to say if a user is the first player
+     * @param user to check up
+     * @return true when first player else false
+     */
     private boolean isFirstPlayer(User user) {
         return first == user && first.getLast_action().equals("");
     }
@@ -658,6 +452,7 @@ public class Game {
      * if zero cards on the table draw 3
      * if there are three cards on the table draw 1
      * if there are four cards on the table draw 1 and set last round
+     * sends a push notification to all players with the board cards
      */
     private void dealBoardCards() {
         card_stack.pop();//burn card;
@@ -694,17 +489,22 @@ public class Game {
         return sum;
     }
 
+    /**
+     * increase the blind index to the index of the next small blind
+     * @return the blind index
+     */
     private int raiseBlindIndex() {
-//        int _index = blind_index;
         blind_index = ++blind_index % active_players.length;
         return blind_index;
     }
 
+    /**
+     * Check if the last element of the lastActions list is equal
+     * to the action given as parameter
+     * @param action to be checked up
+     * @return true when the last element of lastAction is equal to the given action else false
+     */
     private boolean lastActionEquals(String action) {
-        if (!lastActions.isEmpty()) {
-            return lastActions.get(lastActions.size() - 1).equals(action);
-        } else {
-            return false;
-        }
+        return !lastActions.isEmpty() && lastActions.get(lastActions.size() - 1).equals(action);
     }
 }

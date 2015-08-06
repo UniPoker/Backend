@@ -1,12 +1,9 @@
-package server;
+package utils;
 
 import com.sun.mail.smtp.SMTPTransport;
-
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.BufferedReader;
@@ -15,11 +12,29 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 
+/**
+ * A Singleton class used to send Mails.
+ * It sends HTML Mails to the users.
+ *
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ *
+ *  @see com.sun.mail.smtp.SMTPTransport
+ * @see javax.mail.Message
+ * @see javax.mail.MessagingException
+ * @see javax.mail.Session
+ * @see javax.mail.internet.InternetAddress
+ * @see javax.mail.internet.MimeMessage
+ * @see java.io.BufferedReader
+ * @see java.io.FileReader
+ * @see java.io.IOException
+ * @see java.util.Date
+ * @see java.util.Properties
+ */
 public class Mailer {
 
     private static final Mailer MAILER_INSTANCE = new Mailer();
     private String host = "mail.gmx.net";
-    private int port = 587;
     private String from = "uni-poker@gmx.de";
     private String password = "test123456";
 
@@ -61,7 +76,7 @@ public class Mailer {
     }
 
     /**
-     * sends the mail with the given subject to the given mail
+     * sends the mail with the given subject to the given mailadress
      *
      * @param to      String of the mail to be sent to
      * @param subject the subject of the mail

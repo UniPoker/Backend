@@ -1,9 +1,18 @@
-package server;
+package cards;
 
 import com.google.common.collect.ComparisonChain;
-
 import java.util.HashMap;
 
+
+/**
+ * A class representing a single card.
+ * Also implements comparable to make each card comparable by its value.
+ *
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ * @see com.google.common.collect.ComparisonChain
+ * @see java.util.HashMap
+ */
 public class Card implements Comparable<Card>{
 
     private int value;
@@ -46,6 +55,12 @@ public class Card implements Comparable<Card>{
     }
 
 
+    /**
+     * Makes Cards comparable by its value
+     *
+     * @param card
+     * @return Returns a negative integer, zero, or a positive integer as this Card is less than, equal to, or greater than the specified Card
+     */
     @Override
     public int compareTo(Card card) {
         return ComparisonChain.start()

@@ -1,4 +1,6 @@
-package server;
+package utils;
+
+import cards.Card;
 
 import java.util.HashMap;
 import java.util.Map;

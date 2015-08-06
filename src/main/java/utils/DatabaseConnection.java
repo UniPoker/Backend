@@ -1,12 +1,24 @@
-package server;
+package utils;
 
 import java.sql.*;
 
+/**
+ * This class is a singleton class which perform a database connection
+ * and also can perform some operations at the database.
+ *
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ * @see java.sql
+ */
 public class DatabaseConnection {
 
     private static final DatabaseConnection CLASS_INSTANCE = new DatabaseConnection();
     private Connection conn = null;
 
+    /**
+     * The constructor tries to connect to the database.
+     * If the needed table don't exist, it will be created.
+     */
     private DatabaseConnection() {
         try {
             Class.forName("org.h2.Driver");

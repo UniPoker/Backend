@@ -1,4 +1,4 @@
-package server;
+package utils;
 import org.json.JSONObject;
 
 import java.math.*;
@@ -56,7 +56,7 @@ public class RSA {
         return response;
     }
 
-    protected JSONObject entschlüsseln(BigInteger [] encrypted){
+    protected JSONObject entschluesseln(BigInteger[] encrypted){
         decrypted = "";
         BigInteger[] bigKlarZahlen = new BigInteger[this.encrypted.length];	//hier werden die entschlüsselten zahlen gespeichert
         char[]a= new char[this.encrypted.length];	//wird zum ausgeben und umwandeln benötig

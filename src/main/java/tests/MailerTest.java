@@ -2,7 +2,7 @@ package tests;
 
 import org.junit.Before;
 import org.junit.Test;
-import server.Mailer;
+import utils.Mailer;
 
 import static org.junit.Assert.*;
 

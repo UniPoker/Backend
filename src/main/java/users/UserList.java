@@ -1,6 +1,9 @@
-package server;
+package users;
 
+import cards.Card;
 import org.json.JSONArray;
+import utils.TypedMap;
+import utils.Constants;
 
 import javax.websocket.Session;
 import java.util.ArrayList;
@@ -14,7 +17,7 @@ public class UserList {
     public int length = 0;
 
     /**
-     * creates an empty server.UserList
+     * creates an empty users.UserList
      */
     public UserList() {
         users = new ArrayList<User>();
@@ -27,7 +30,7 @@ public class UserList {
     }
 
     /**
-     * @param users creates server.UserList with all Elements of the given Array
+     * @param users creates users.UserList with all Elements of the given Array
      */
     public UserList(User[] users) {
         this.users = new ArrayList<User>(Arrays.asList(users));
@@ -40,7 +43,7 @@ public class UserList {
     }
 
     /**
-     * @param user user to add to server.UserList
+     * @param user user to add to users.UserList
      */
     public void add(User user) {
         users.add(user);
@@ -48,7 +51,7 @@ public class UserList {
     }
 
     /**
-     * @param user server.User to delete from server.UserList
+     * @param user users.User to delete from users.UserList
      */
     public void removeUser(User user) {
         boolean removed = users.removeIf(p -> p == user);
@@ -58,9 +61,9 @@ public class UserList {
     }
 
     /**
-     * Remove server.User with param session from server.UserList
+     * Remove users.User with param session from users.UserList
      *
-     * @param session Websession of server.User
+     * @param session Websession of users.User
      */
     public void removeUserWithSession(Session session) {
         users.removeIf(p -> p.getWebsession() == session);
@@ -68,7 +71,7 @@ public class UserList {
     }
 
     /**
-     * "delete" all Elements in server.UserList
+     * "delete" all Elements in users.UserList
      */
     public void clearAll() {
         users.removeAll(users);
@@ -76,40 +79,70 @@ public class UserList {
     }
 
     /**
-     * @return the size of server.UserList
+     * @return the size of users.UserList
      */
 //    public int length() {
 //        return users.size();
 //    }
 
     /**
-     * @return server.UserList
+     * @return users.UserList
      */
     public List<User> getUsers() {
         List<User> _users = new ArrayList<User>(users);
         return _users;
     }
 
+    /**
+     * returns a new userlist except a single user
+     *
+     * @param user the be excepted from the new userlist
+     * @return a new userlist
+     */
     public List<User> getUsersExceptUser(User user) {
         List<User> _users = users;
         _users.removeIf(p -> p == user);
         return _users;
     }
 
+    /**
+     * @see UserList#getUsersExceptUser(User)
+     * @param session session to be excepted
+     * @return a new userlist
+     */
     public List<User> getUsersExceptSession(Session session) {
         List<User> _users = users;
         _users.removeIf(p -> p.getWebsession() == session);
         return _users;
     }
 
+    /**
+     * This method returns a user from the userlist by its index
+     *
+     * @param index to be checked up
+     * @return the user with the given index
+     */
     public User getUserByIndex(int index) {
         return users.get(index);
     }
 
+    /**
+     * replace the user at the given index
+     *
+     * @param index the index  which should be replaced
+     * @param user the user who should be at the index
+     * @see ArrayList#set(int, Object)
+     */
     public void setUserByIndex(int index, User user) {
         users.set(index, user);
     }
 
+    /**
+     * seach for a user by its session and returns it.
+     *
+     * @param session to check up a user
+     * @return the user with the given session
+     */
     public User getUserBySession(Session session) {
         for (User user : users) {
             if (user.getWebsession().getId() == session.getId()) {
@@ -119,6 +152,13 @@ public class UserList {
         return null;
     }
 
+    /**
+     * seach for a user by its name and returns it.
+     * Possible because the name is unique in the database
+     *
+     * @param name to check up a user
+     * @return the user with the given name
+     */
     public User getUserByName(String name) {
         for (User user : users) {
             if (user.getName().equals(name)) {
@@ -128,14 +168,29 @@ public class UserList {
         return null;
     }
 
+    /**
+     * This method is used to get the index of a user in the userlist.
+     *
+     * @param user to check up for
+     * @return the index of the user
+     */
     public int getIndexOfUser(User user) {
         return users.indexOf(user);
     }
 
+    /**
+     * Check if the given user is in the userlist.
+     *
+     * @param user to check up for
+     * @return true when user is in the userlist
+     */
     public boolean contains(User user) {
         return users.contains(user);
     }
 
+    /**
+     * @return a jsonarray representation of the userlist
+     */
     public JSONArray getInterfaceUserList() {
         JSONArray arr = new JSONArray();
         for (User user : users) {
@@ -146,6 +201,13 @@ public class UserList {
         return arr;
     }
 
+    /**
+     * @param small_blind points out which user is small blind
+     * @param big_blind points out which user is small
+     * @param current_user point out who is at turn
+     * @param show_player_cards point out if the player cards should be shown
+     * @return a jsonarray representation of the userlist
+     */
     public JSONArray getInterfaceUserList(User small_blind, User big_blind, User current_user, boolean show_player_cards) {
         JSONArray arr = new JSONArray();
         for (User user : users) {
@@ -176,22 +238,38 @@ public class UserList {
         return arr;
     }
 
+    /**
+     *
+     * @param user to get the before user
+     * @return the user before the given user
+     */
     public User getPreviousUser(User user) {
         return this.getUserByIndex((users.indexOf(user) - 1 % length + length) % length);
     }
 
+    /**
+     * Iterate over the userlist and reinitilize the hand cards of all users.
+     * @see User#resetHandCards()
+     */
     public void resetAllHandCards() {
         for (User user : users) {
             user.resetHandCards();
         }
     }
 
+    /**
+     * Iterate over the userlist and reinitilize what the users already paid.
+     * @see User#resetPayment() ()
+     */
     public void resetAlreadyPaid() {
         for (User user : users) {
             user.resetPayment();
         }
     }
 
+    /**
+     * @return the highest already paid attribute of the users in this list.
+     */
     public int getHighestBet() {
         int i = 0;
         for (User user : users) {
@@ -203,6 +281,9 @@ public class UserList {
         return i;
     }
 
+    /**
+     * @return true when all users already_paid attribute is equal
+     */
     public boolean allUsersPaidSame() {
         boolean paid_same = true;
         int first_payment = users.get(0).getAlready_paid();
@@ -214,12 +295,20 @@ public class UserList {
         return paid_same;
     }
 
+    /**
+     * @param user to check his already paid attribute
+     * @return the value of money the user got to call.
+     */
     public int getCallValueForUser(User user) {
         int highest_bet = getHighestBet();
         int already_paid = user.getAlready_paid();
         return highest_bet - already_paid;
     }
 
+    /**
+     * @return true when all users in the list perform an action
+     * @see Constants.Actions
+     */
     public boolean allPlayersActionNotNull() {
         for (User user : users) {
             if (user.getLast_action().equals("")) {
@@ -229,6 +318,9 @@ public class UserList {
         return true;
     }
 
+    /**
+     * This method reinitilize the user action to "" of all users in the userlist.
+     */
     public void resetAllPlayersAction() {
         for (User user : users) {
             user.setLast_action("");

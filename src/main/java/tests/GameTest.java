@@ -2,10 +2,10 @@ package tests;
 
 import org.junit.Before;
 import org.junit.Test;
-import server.Card;
-import server.Game;
-import server.User;
-import server.UserList;
+import cards.Card;
+import game.Game;
+import users.User;
+import users.UserList;
 
 import java.util.ArrayList;
 import java.util.Arrays;

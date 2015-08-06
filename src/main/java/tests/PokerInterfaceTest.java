@@ -1,11 +1,12 @@
 package tests;
 
+import interfaces.PokerInterface;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import server.*;
-
-import static org.junit.Assert.*;
+import rooms.RoomList;
+import users.User;
+import users.UserList;
 
 /**
  * Created by loster on 23.07.2015.

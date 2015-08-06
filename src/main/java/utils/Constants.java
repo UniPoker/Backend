@@ -1,12 +1,27 @@
-package server;
+package utils;
 
+/**
+ * Constants is a helper class which holds subclasses.
+ * These subclasses have static constants, that they are accessible
+ * from all over the project.
+ *
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ */
 public final class Constants {
+
 
     private Constants(){}
 
+    /**
+     * Holds every constant class needed for cards.
+     */
     public static final class Cards{
         private Cards(){}
 
+        /**
+         * This Class holds every value a card could have.
+         */
         public static final class Value{
             public static final int ACE = 14;
 
@@ -26,6 +41,9 @@ public final class Constants {
             private Value(){}
         }
 
+        /**
+         * This Class holds every symbol a card could have.
+         */
         public static final class Symbols{
             public static final String HEARTS = "hearts";
             public static final String SPADES = "spades";
@@ -35,6 +53,12 @@ public final class Constants {
             public static final String[] ALL_SYMBOLS = {HEARTS,SPADES,CLUBS,DIAMONDS};
         }
 
+
+        /**
+         * This class holds the value of combinations a user could have.
+         * Each constant is an int value which represents the
+         * value of the combination the user has.
+         */
         public static final class HandValues {
             private HandValues(){}
 
@@ -49,6 +73,10 @@ public final class Constants {
             public static final int PAIR = 2;
             public static final int HIGH_CARD = 1;
 
+            /**
+             * @param value the value of the combination the user have.
+             * @return the string representation of the combination.
+             */
             public static final String getCombinationValue(int value) {
                 switch(value){
                     case HIGH_CARD:
@@ -79,6 +107,9 @@ public final class Constants {
         }
     }
 
+    /**
+     * This class holds all possible actions a user could perform during his turn.
+     */
     public final class Actions {
 
         private Actions(){} //

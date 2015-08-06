@@ -1,8 +1,16 @@
-package server;
+package utils;
 
-import org.json.JSONArray;
+import cards.Card;
 import org.json.JSONObject;
+import users.User;
 
+/**
+ * A class only with static method.
+ * This methods should return a json frame which is needed all over the project
+ *
+ * @author Stefan Fuchs
+ * @author Jan-Niklas Wortmann
+ */
 public class Helper {
 
     /**
@@ -21,6 +29,15 @@ public class Helper {
         return frame;
     }
 
+    /**
+     * Creates and returns a JSONObject with the given parameters
+     *  e.g. {"value" : 1, "user": USEROBJECT, "cards": CARDSOBJECT}
+     *
+     * @param user the user put into the jsonobject
+     * @param cards the card put into the jsonobject
+     * @param value the value put into the jsonobject
+     * @return a jsonobject representing the winner of a game
+     */
     public static JSONObject getWinnerJSON(User user, Card[] cards, int value) {
         JSONObject obj = new JSONObject();
         obj.put("value", value);
