@@ -40,7 +40,7 @@ public class User {
      * @param websession Session of connected users.User
      * @param name       Name of connected users.User
      */
-    User(Session websession, String name, String password) {
+    public User(Session websession, String name, String password) {
         hand_cards = new Card[2];
         this.websession = websession;
         this.name = name;

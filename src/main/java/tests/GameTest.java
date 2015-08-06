@@ -1,11 +1,11 @@
 package tests;
 
+import game.EvaluateHandCards;
 import org.junit.Before;
 import org.junit.Test;
 import cards.Card;
 import game.Game;
 import users.User;
-import users.UserList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,10 +18,11 @@ import static org.junit.Assert.*;
  * Created by loster on 01.08.2015.
  */
 public class GameTest {
-    Game game;
+    EvaluateHandCards game;
     @Before
     public void setup(){
-        game = new Game(new UserList());
+
+        game = new EvaluateHandCards();
     }
 
     @Test
