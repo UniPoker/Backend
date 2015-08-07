@@ -1,11 +1,13 @@
 package tests;
 
 import game.EvaluateHandCards;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import cards.Card;
 import game.Game;
 import users.User;
+import users.UserList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -581,4 +583,38 @@ public class EvaluateHandCardsTest {
         assertNotNull(was_successfull);
         assertEquals(5, was_successfull.length);
     }
+
+    @Test
+    public void testGetWinner(){
+        Card card_1 = new Card(9,"diamonds");
+        Card card_2 = new Card(9,"hearts");
+        Card card_3 = new Card(2,"spades");
+        Card card_4 = new Card(4,"spades");
+        Card card_5 = new Card(3,"clubs");
+
+        Card card_6 = new Card(9,"clubs");
+        Card card_7 = new Card(13,"diamonds");
+
+        Card card_8 = new Card(9,"spades");
+        Card card_9 = new Card(14,"diamonds");
+        Card [] board = new Card[5];
+        board[0] = card_1;
+        board[1] = card_2;
+        board[2] = card_3;
+        board[3] = card_4;
+        board[4] = card_5;
+        User user = new User();
+        user.setName("spieler 1");
+        user.setHandCards(card_6);
+        user.setHandCards(card_7);
+        User user1 = new User();
+        user1.setName("müsste gewinnen");
+        user1.setHandCards(card_8);
+        user1.setHandCards(card_9);
+        UserList list = new UserList(user);
+        list.add(user1);
+        JSONObject winner = game.getWinner(list, board);
+        assertNotNull(winner);
+    }
+
 }

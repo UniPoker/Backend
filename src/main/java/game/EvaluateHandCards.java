@@ -62,12 +62,14 @@ public class EvaluateHandCards {
                     // wenn kombination gleichwertig, dann wer höhere handkarten hat
                     highest_user_value = 0; //momentaner sieger
                     user_value = 0;
+                    User _user = (User)highest_value.get("user");
                     Card[] highest_cards = ArrayUtils.addAll(board, current_user.getHandCards());
+                    Card[] _current_cards = ArrayUtils.addAll(board, _user.getHandCards());
                     for (int i = 0; i < highest_cards.length; i++) {
                         highest_user_value += highest_cards[i].getValue();
-                        user_value += current_cards.get(i).getValue();
+                        user_value += _current_cards[i].getValue();
                     }
-                    if (highest_user_value < user_value) {
+                    if (highest_user_value > user_value) {
                         highest_value = best_possibility;
                     } else if (highest_user_value == user_value) {
                         //TODO SPLITPOT

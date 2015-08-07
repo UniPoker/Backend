@@ -188,4 +188,8 @@ public class User {
     public String getLast_action(){
         return last_action;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
