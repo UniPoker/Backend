@@ -240,11 +240,20 @@ public class UserList {
 
     /**
      *
-     * @param user to get the before user
+     * @param user to get the user before
      * @return the user before the given user
      */
     public User getPreviousUser(User user) {
         return this.getUserByIndex((users.indexOf(user) - 1 % length + length) % length);
+    }
+
+    /**
+     *
+     * @param user to get the next user
+     * @return the user next to the given user
+     */
+    public User getNextUser(User user) {
+        return this.getUserByIndex((users.indexOf(user) + 1 % length + length) % length);
     }
 
     /**

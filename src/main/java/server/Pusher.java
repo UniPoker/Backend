@@ -31,7 +31,7 @@ public class Pusher {
 
     public Pusher(UserList users) {
         sessions = new ArrayList<>();
-        sessions.addAll(users.getUsers().stream().filter(session-> session == null).map(User::getWebsession).collect(Collectors.toList()));
+        sessions.addAll(users.getUsers().stream().map(User::getWebsession).collect(Collectors.toList()));
     }
 
     /**

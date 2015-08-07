@@ -123,7 +123,7 @@ public class Game {
             body.put("message", "hat um" + raise + "erhöht");
             body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
-            setNextUser(player);
+            setNextUser(player, active_players.getIndexOfUser(player));
             return true;
         } else {
             return false;
@@ -148,7 +148,7 @@ public class Game {
             body.put("message", "hat" + bet + "gesetzt");
             body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
-            setNextUser(player);
+            setNextUser(player, active_players.getIndexOfUser(player));
             return true;
         } else {
             return false;
@@ -173,7 +173,7 @@ public class Game {
             body.put("message", "hat gecalled");
             body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
-            setNextUser(player);
+            setNextUser(player, active_players.getIndexOfUser(player));
             return true;
         } else {
             return false;
@@ -195,7 +195,7 @@ public class Game {
             body.put("message", "hat gechecked");
             body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
-            setNextUser(player);
+            setNextUser(player, active_players.getIndexOfUser(player));
             return true;
         }
         return false;
@@ -210,12 +210,13 @@ public class Game {
     public boolean doFold(User player) {
         if (isCurrent(player)) {
 //            setLastActions(Constants.Actions.FOLD, player);
+            int index = active_players.getIndexOfUser(player) -1;
             active_players.removeUser(player);
             JSONObject body = new JSONObject();
             body.put("message", "hat gefolded");
             body.put("sender", player.getName());
             pusher.pushToAll("action_performed_notification", body);
-            setNextUser(player);
+            setNextUser(player, index);
             return true;
         } else {
             return false;
@@ -254,9 +255,9 @@ public class Game {
      *
      * @param current_player the current player who did the last action
      */
-    private void setNextUser(User current_player) {
+    private void setNextUser(User current_player, int user_index) {
         previous = current_player;
-        int index = (active_players.getUsers().indexOf(current_player) + 1) % active_players.length;
+        int index = (user_index + 1) % active_players.length;
         current = active_players.getUserByIndex(index);
         boolean no_players_left = active_players.length == 1;
         if ((!lastActions.isEmpty() && active_players.allUsersPaidSame() && active_players.allPlayersActionNotNull()) || no_players_left) {
@@ -292,7 +293,7 @@ public class Game {
                     // nur wenn small noch nicht folded hat
                     current = small_blind;
                 } else {
-                    int small_blind_index = blind_index % active_players.length;
+                    int small_blind_index = blind_index-1 % active_players.length;
                     current = active_players.getUserByIndex(small_blind_index);
                 }
                 JSONObject body = new JSONObject();
@@ -341,7 +342,7 @@ public class Game {
         card_stack = new CardStack();
         dealCards();
         setBlindPlayers();
-        setNextUser(big_blind);
+        setNextUser(big_blind, active_players.getIndexOfUser(big_blind));
         first = current;
         JSONObject body = new JSONObject();
         body.put("message", "ist jetzt am Zug");

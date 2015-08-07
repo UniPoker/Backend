@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 /**
  * Created by loster on 01.08.2015.
  */
-public class GameTest {
+public class EvaluateHandCardsTest {
     EvaluateHandCards game;
     @Before
     public void setup(){
