@@ -5,7 +5,12 @@ import cards.Card;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * adapted from
+ * http://stackoverflow.com/questions/10429230/map-with-multiple-value-types-with-advantages-of-generics
+ */
 public class TypedMap {
+
 
     private Map<AbstractKey<?>, Object> map = new HashMap<AbstractKey<?>, Object>();
 

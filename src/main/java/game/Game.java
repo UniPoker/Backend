@@ -66,7 +66,7 @@ public class Game {
      */
     public void joinGame(User player) {
         pusher.addUser(player);
-        pushGameDataToUsers("user_joined_notification", false);
+        pushGameDataToUsers("user_list_notification", false);
     }
 
     /**
@@ -76,7 +76,7 @@ public class Game {
      */
     public void leaveGame(User player) {
         pusher.removeUser(player);
-        pushGameDataToUsers("user_left_notification", false);
+        pushGameDataToUsers("user_list_notification", false);
     }
 
     public UserList getActive_players(){
@@ -99,7 +99,7 @@ public class Game {
             start_body.put("message", "Runde konnte nicht gestartet werden");
             pusher.pushToSingle("request_start_round_response", start_body, player.getWebsession());
             JSONObject body = getJsonGameFrame(player, false);
-            pusher.pushToSingle("user_joined_notification", body, player.getWebsession());
+            pusher.pushToSingle("user_list_notification", body, player.getWebsession());
         }
     }
 
