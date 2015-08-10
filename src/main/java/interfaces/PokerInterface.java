@@ -304,7 +304,7 @@ public class PokerInterface {
             body.put("room_id", joining_room.getId());
             return Helper.getJsonFrame(0, "Erfolgreich Raum beigetreten", body, "join_room_response");
         } else {
-            return Helper.getJsonFrame(1, "User schon im Raum", new JSONObject(), "join_room_response");
+            return Helper.getJsonFrame(2, "User schon im Raum", new JSONObject(), "join_room_response");
         }
     }
 
